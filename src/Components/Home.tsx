@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import logo from "../assets/react.svg";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useProcesoContext } from "../Context/ProcessContext";
 import FormProceso from "./FormProcess";
 import QuequeProcess from "./QuequePrecess";
@@ -37,18 +37,14 @@ const Home = () => {
         switch (algorithm) {
             case 'FCFS':
                 //ir a x componente
-                console.log("primeroooo")
                 break;
             case 'FJS': 
-                console.log("segundoooo")
                 // ir a x componente
                 break;
             case 'SRTF': 
-                console.log("terceroooo")
                 // ir a x componente
                 break;
             case 'RR':
-                console.log("cuartoooo") 
                 // ir a x componente
                 break;
             default:

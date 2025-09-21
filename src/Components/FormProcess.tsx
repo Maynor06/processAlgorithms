@@ -4,7 +4,7 @@ import { useProcesoContext } from '../Context/ProcessContext';
 
 const FormProceso = () => {
 
-    const { agregarProceso, procesos } = useProcesoContext();
+    const { agregarProceso } = useProcesoContext();
     const [formData, setFormData] = useState({
         NombreProceso: '',
         MemoriaRequired: 0,
