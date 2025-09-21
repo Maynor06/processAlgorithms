@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import './App.css'
+import RouterComponent from './Router'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
-    <h1 className='bg-black' >Holaaaa</h1>
+      <RouterComponent/>
     </>
   )
 }
