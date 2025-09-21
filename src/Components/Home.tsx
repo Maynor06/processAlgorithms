@@ -74,7 +74,7 @@ const Home = () => {
                             <option value="" disabled={true}>Selecciona el algoritmo</option>
                             {algorithmOptions.map((option, index) => (
                                 <option key={index} value={option.value}>{option.nombre}</option>
-                            ))}
+                            ))} 
                         </select>
                         <button onClick={irASimulator} className="bg-[#d7c8ff] transition-all duration-[2000ms] hover:scale-110 hover:bg-blue-200 h-12 w-56 rounded-2xl text-xl " style={{ fontFamily: "'Coiny', system-ui" }}>
                             Iniciar Simulación
