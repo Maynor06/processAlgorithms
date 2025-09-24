@@ -1,3 +1,149 @@
+/* ========= HERO (responsivo con imagen de fondo) ========= */
+.hero {
+  position: relative;
+  min-height: 100dvh;          /* altura pantalla completa, compatible móvil */
+  color: #ffffff;
+  overflow: hidden;
+  background: url('../assets/back1.jpg') no-repeat center center/cover;
+  font-family: 'Poppins', sans-serif; /* tu cambio de fuente */
+  padding-top: env(safe-area-inset-top); /* evita notch en iOS */
+}
+
+/* Barra superior */
+.hero__nav {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.hero__brand {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-size: clamp(12px, 1.6vw, 15px);
+  opacity: 0.95;
+  white-space: nowrap;
+}
+
+.hero__links {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 3vw, 28px);
+  flex-wrap: wrap; /* permite saltar de línea en pantallas chicas */
+}
+
+.hero__link {
+  color: #e9eeff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: clamp(12px, 1.6vw, 15px);
+  opacity: 0.92;
+}
+.hero__link:hover { opacity: 1; }
+
+/* Centro del hero */
+.hero__center {
+  max-width: 880px;
+  margin: clamp(48px, 10vh, 120px) auto 0 auto;
+  text-align: center;
+  padding: 0 clamp(16px, 4vw, 32px);
+}
+
+.hero__title {
+  font-size: clamp(28px, 6vw, 64px);
+  line-height: 1.1;
+  font-weight: 800;
+  margin: 0 0 12px 0;
+  text-wrap: balance; /* mejor quiebre en móviles modernos */
+}
+
+.hero__subtitle {
+  font-size: clamp(14px, 2.3vw, 18px);
+  color: #dde6ff;
+  max-width: 760px;
+  margin: 0 auto clamp(18px, 3.6vw, 28px) auto;
+}
+
+/* Botón */
+.hero__cta {
+  border: 0;
+  border-radius: 14px;
+  font-weight: 800;
+  padding: clamp(10px, 1.6vw, 14px) clamp(18px, 3.2vw, 28px);
+  background: #00ffe7;                /* color estilo neón */
+  color: #0c1124;
+  cursor: pointer;
+  font-size: clamp(14px, 1.8vw, 16px);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+
+  /* efecto glow */
+  box-shadow: 0 0 10px #00ffe7,
+              0 0 20px #00ffe7,
+              0 0 40px #00ffe7;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.hero__cta:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px #00ffe7,
+              0 0 40px #00ffe7,
+              0 0 60px #00ffe7,
+              0 0 80px #00ffe7;
+}
+
+/* Decorativos (opcionales) */
+
+
+
+/* ==================== RESPONSIVE BREAKPOINTS ==================== */
+
+/* Tablet y abajo */
+@media (max-width: 992px) {
+  .hero__nav { padding: 18px 20px; }
+  .hero__center { margin-top: clamp(40px, 9vh, 100px); }
+}
+
+/* Móvil grande */
+@media (max-width: 768px) {
+  .hero__nav {
+    max-width: 100%;
+    padding: 16px clamp(14px, 4vw, 20px);
+    gap: 10px;
+  }
+  .hero__links {
+    gap: clamp(8px, 2.6vw, 16px);
+  }
+  .hero__cta {
+    width: 100%;
+    max-width: 340px;
+  }
+  .hero__chipShadow,
+  .hero__logo { display: none; }
+}
+
+/* Móvil pequeño */
+@media (max-width: 480px) {
+  .hero__nav {
+    justify-content: space-between;
+  }
+  .hero__brand { letter-spacing: 0.06em; }
+  .hero__center { margin-top: clamp(28px, 8vh, 72px); }
+  .hero__subtitle { max-width: 96%; }
+}
+
+/* Soporte accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .hero__cta { transition: none; }
+}
+
+
+
+/* ========= FORMULARIO Y MODAL (mantengo lo que ya tenías) ========= */
 .contain-form{
     display: flex;
     background-color: #F8F8FF;
@@ -55,7 +201,6 @@
     align-items: center;
 }
 
-
 .modal {
     background: white;
     padding: 20px;
@@ -64,8 +209,8 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centra todo horizontalmente */
-    text-align: center;  /* Asegura que el texto esté centrado */
+    align-items: center;
+    text-align: center;
 }
 
 .modal button {
