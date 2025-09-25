@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router";
 import logo from "../assets/react.svg";
 import { useState } from "react";
-import { useProcesoContext } from "../Context/ProcessContext";
+import { useProcesoContext, type Proceso } from "../Context/ProcessContext";
 import FormProceso from "./FormProcess";
 import QuequeProcess from "./QuequePrecess";
+import { SJF } from "./Algorithms/SJF";
 
 const Home = () => {
 
@@ -12,10 +13,10 @@ const Home = () => {
     const [errorMessage, setErrorMessage] = useState("")
     const [algorithm, setAlgorithm]  = useState("")
     const algorithmOptions = [
-    { value: "FCFS", nombre: "First Come First Served" },
-    { value: "FJS", nombre: "Shorted Job First" },
-    { value: "SRTF", nombre: "Shortest Remaining Time First" },
-    { value: "RR", nombre: "Round Robin" }
+    { value: "FCFS", nombre: "First Come First Served [FCFS]" },
+    { value: "SJF", nombre: "Shorted Job First [SJF]" },
+    { value: "SRTF", nombre: "Shortest Remaining Time First [SRTF]" },
+    { value: "RR", nombre: "Round Robin [RR]" }
 ];
 
     const { procesos } = useProcesoContext();
@@ -34,12 +35,14 @@ const Home = () => {
             setShowModal(true);
             return;
         }
+
+        let resultado: Proceso[] = [];
+
         switch (algorithm) {
             case 'FCFS':
                 //ir a x componente
                 break;
-            case 'FJS': 
-                // ir a x componente
+            case 'SJF':  resultado = SJF(procesos);
                 break;
             case 'SRTF': 
                 // ir a x componente
@@ -51,6 +54,7 @@ const Home = () => {
                 // error
                 break;
         }
+        console.log("Procesos ordenados segun el algoritmo: ", resultado);
         // aca va a ir la logica para ir al componente de x proceso
     }
 
