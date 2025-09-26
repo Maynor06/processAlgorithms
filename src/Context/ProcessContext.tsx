@@ -5,7 +5,9 @@ export interface Proceso {
     NombreProceso: string; 
     MemoriaRequired: number; 
     Duration: number;
+    InstanteLLegada: number;
     UnidadEntrada: number;
+    Quantum: number;
 }
 
 interface PrecesoContextType {

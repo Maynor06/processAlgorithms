@@ -4,16 +4,20 @@ import { useProcesoContext } from '../Context/ProcessContext';
 
 interface FormProcesoProps {
     onClose: () => void;
+    algoritmo: string; // Se recibe el algoritmo actual
+    
 }
 
-const FormProceso: React.FC<FormProcesoProps> = ({ onClose }) => {
+const FormProceso: React.FC<FormProcesoProps> = ({ onClose, algoritmo }) => {
 
     const { agregarProceso } = useProcesoContext();
     const [formData, setFormData] = useState({
         NombreProceso: '',
         MemoriaRequired: 0,
         Duration: 0,
+        InstanteLlegada: 0,
         UnidadEntrada: 0,
+        Quantum: 0,
     });
 
     const [showModal, setShowModal] = useState(1);
@@ -65,11 +69,23 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose }) => {
             return;
         }
 
+        if (formData.InstanteLlegada < 0) {
+            setErrorMessage('El instante de llegada no puede ser negativo.');
+            return;
+        }
+
+        if (algoritmo === "rr" && formData.Quantum <= 0) {
+            setErrorMessage('El Quantum debe ser mayor a 0 en Round Robin.');
+            return;
+        }
+        console.log("holasdfsdlfkjsldfjlskdjflksdjflksjdlf" + algoritmo)
+
         const newProceso = {
             PID: Date.now(),
             ...formData,
             // si estaba vacío, se genera automáticamente
-            NombreProceso: nombreFinal
+            NombreProceso: nombreFinal,
+            Quantum: algoritmo === "rr" ? formData.Quantum : null, // solo si aplica
         };
 
         agregarProceso(newProceso);
@@ -84,11 +100,12 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose }) => {
             NombreProceso: '',
             MemoriaRequired: 0,
             Duration: 0,
-            UnidadEntrada: 0
+            InstanteLlegada: 0,
+            UnidadEntrada: 0,
+            Quantum: 0
         });
 
         setErrorMessage('');
-
         onClose();
     };
 
@@ -103,9 +120,10 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose }) => {
                 value={formData.NombreProceso}
                 name="NombreProceso"
                 onChange={handleChange}
-                placeholder="Ingresa el nombre del proceso"
+                placeholder="Nombre del proceso"
             />
 
+            {/* eliminar input */}
             <input
                 type="number"
                 className="shadow-2xl"
@@ -121,7 +139,16 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose }) => {
                 value={formData.Duration === 0 ? '' : formData.Duration}
                 name="Duration"
                 onChange={handleChange}
-                placeholder="Duración (s)"
+                placeholder="Tiempo en CPU"
+            />
+
+            <input
+                type="number"
+                className="shadow-2xl"
+                value={formData.InstanteLlegada === 0 ? '' : formData.InstanteLlegada}
+                name="InstanteLlegada"
+                onChange={handleChange}
+                placeholder="Instante de llegada"
             />
 
             <input
@@ -131,6 +158,16 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose }) => {
                 name="UnidadEntrada"
                 onChange={handleChange}
                 placeholder="Unidad Entrada"
+            />
+
+            <input
+                type="number"
+                className="shadow-2xl"
+                value={formData.Quantum === 0 ? '' : formData.Quantum}
+                name="Quantum"
+                onChange={handleChange}
+                placeholder="Quantum de tiempo"
+                disabled={algoritmo !== "rr"} //caso round robin
             />
 
             {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}

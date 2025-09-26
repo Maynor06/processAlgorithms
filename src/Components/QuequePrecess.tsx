@@ -25,8 +25,11 @@ const QuequeProcess = () => {
                                     <p className="text-[#A9A9A9] text-[12px] " >{proceso.PID} </p>
                                     <h2 className="font-bold text-2xl " >{proceso.NombreProceso}</h2>
                                     <p className="text-[17px] " >Memoria requerida: {proceso.MemoriaRequired} Mb</p>
-                                    <p>Duracion:  {proceso.Duration}s </p>
+                                    <p>Tiempo en CPU:  {proceso.Duration}s </p>
+                                    <p>Instante llegada:  {proceso.InstanteLLegada}s </p>
                                     <p>Unidad de Entrada: {proceso.UnidadEntrada}</p>
+                                    <p>Quantum: {proceso.Quantum}</p>
+
                                     <button className="mt-2 px-4 py-1 bg-red-500 text-white rounded" onClick={() => finalizarProceso(proceso.PID)}>
                                         Eliminar
                                     </button>

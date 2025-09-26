@@ -125,7 +125,7 @@ export default function Home() {
             </button>
 
             {/* Aquí metemos el formulario */}
-            <FormProceso onClose={() => setShowModal(false)} />
+            <FormProceso onClose={() => setShowModal(false)} algoritmo = {selectedAlgo}/>
           </div>
         </div>
       )}
