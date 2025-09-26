@@ -20,11 +20,21 @@ function colorForPid(pid: number) {
 
 export default function Home() {
   // --- Procesos iniciales (sin inputs por ahora) ---
-  const initial: Process[] = [
-    { pid: 1, name: "A", arrivalTime: 0, burstTime: 4 },
-    { pid: 2, name: "B", arrivalTime: 2, burstTime: 2 },
-    { pid: 3, name: "C", arrivalTime: 3, burstTime: 3 },
-  ];
+// --- Procesos iniciales (15 procesos) ---
+
+
+
+const initial: Process[] = [
+  { pid: 1, name: "A", arrivalTime: 0, burstTime: 8 }, // largo, arranca primero
+  { pid: 2, name: "B", arrivalTime: 1, burstTime: 4 }, // preempta a A en t=1
+  { pid: 3, name: "C", arrivalTime: 2, burstTime: 2 }, // preempta a B en t=2
+  { pid: 4, name: "D", arrivalTime: 3, burstTime: 6 }, // entra a cola mientras C termina
+  { pid: 5, name: "E", arrivalTime: 4, burstTime: 1 }, // toma CPU en t=4 por ser el más corto
+  { pid: 6, name: "F", arrivalTime: 5, burstTime: 3 }, // empate con B (3 vs 3) → nuestro tie-break favorece F (llegó después)
+  { pid: 7, name: "G", arrivalTime: 6, burstTime: 2 }, // preempta a F (2 vs 2 → favorece G por llegada más tardía)
+];
+
+
 
 
 
@@ -87,22 +97,12 @@ export default function Home() {
     };
   }, [isRunning, isPaused, isComplete]);
 
-  // (Demo) agregar un proceso en caliente en t=5 — puedes borrar esto después
-  useEffect(() => {
-    if (!engineRef.current) return;
-    const id = window.setTimeout(() => {
-      const now = engineRef.current!.now();
-      const p: Process = { pid: 4, name: "D", arrivalTime: now, burstTime: 2 };
-      engineRef.current!.addProcess(p);
-      // Mantener mapa de nombres actualizado
-      setProcNameMap((m) => {
-        const c = new Map(m);
-        c.set(p.pid, p.name);
-        return c;
-      });
-    }, 5 * TIME_UNIT);
-    return () => clearTimeout(id);
-  }, []);
+
+
+
+
+
+
 
   // --- Derivados para la visualización ---
   const MAX_COLS = 40;
