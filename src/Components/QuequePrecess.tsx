@@ -8,9 +8,9 @@ const QuequeProcess = () => {
 
     return (
         <>
-            <div className="bg-transparent w-[400px] h-[500px] rounded-3xl border-3 border-violet-300 overflow-hidden" >
-                <h1 className="bg-transparent text-3xl font-bold text-center text-violet-400 border-b-2 w-fit ml-auto mr-auto " style={{ fontFamily: "'Coiny', sans-serif" }} >Procesos a ejecutar</h1>
-                <div className="bg-transparent" style={{height: '470px', overflowY: 'auto', paddingRight: '8px', paddingBottom: '12px'}}>
+            {/* <div className="bg-transparent w-[400px] h-[500px] rounded-3xl border-3 border-violet-300 overflow-hidden" > */}
+                {/* <h1 className="bg-transparent text-3xl font-bold text-center text-violet-400 border-b-2 w-fit ml-auto mr-auto " style={{ fontFamily: "'Coiny', sans-serif" }} >Procesos a ejecutar</h1> */}
+                {/* <div className="bg-transparent" style={{height: '470px', overflowY: 'auto', paddingRight: '8px', paddingBottom: '12px'}}> */}
                     <AnimatePresence>
                         {procesos.length !== 0 ? (
                             procesos.map((proceso) => (
@@ -34,8 +34,8 @@ const QuequeProcess = () => {
                             ))
                         ) : <motion.div className="flex items-center justify-center h-100 w-full text-center text-sm text-gray-300" initial={{opacity:0}} animate={{opacity:1}} style = {{fontFamily: "'Press Start 2P', system-ui"}} >Lista vacia</motion.div>}
                     </AnimatePresence>
-                </div>
-            </div>
+                {/* </div> */}
+            {/* </div> */}
         </>
     )
 }

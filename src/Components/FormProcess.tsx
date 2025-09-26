@@ -94,51 +94,51 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose }) => {
 
 
     return (
-                <form className="form" onSubmit={handleSubmit}>
-                    <h2 className="font-bold text-xl text-center">Nuevo Proceso</h2>
+        <form className="form" onSubmit={handleSubmit}>
+            <h2 className="font-bold text-xl text-center">Nuevo Proceso</h2>
 
-                    <input
-                        type="text"
-                        className="shadow-2xl"
-                        value={formData.NombreProceso}
-                        name="NombreProceso"
-                        onChange={handleChange}
-                        placeholder="Ingresa el nombre del proceso"
-                    />
+            <input
+                type="text"
+                className="shadow-2xl"
+                value={formData.NombreProceso}
+                name="NombreProceso"
+                onChange={handleChange}
+                placeholder="Ingresa el nombre del proceso"
+            />
 
-                    <input
-                        type="number"
-                        className="shadow-2xl"
-                        value={formData.MemoriaRequired === 0 ? '' : formData.MemoriaRequired}
-                        name="MemoriaRequired"
-                        onChange={handleChange}
-                        placeholder="Memoria requerida (MB)"
-                    />
+            <input
+                type="number"
+                className="shadow-2xl"
+                value={formData.MemoriaRequired === 0 ? '' : formData.MemoriaRequired}
+                name="MemoriaRequired"
+                onChange={handleChange}
+                placeholder="Memoria requerida (MB)"
+            />
 
-                    <input
-                        type="number"
-                        className="shadow-2xl"
-                        value={formData.Duration === 0 ? '' : formData.Duration}
-                        name="Duration"
-                        onChange={handleChange}
-                        placeholder="Duración (s)"
-                    />
+            <input
+                type="number"
+                className="shadow-2xl"
+                value={formData.Duration === 0 ? '' : formData.Duration}
+                name="Duration"
+                onChange={handleChange}
+                placeholder="Duración (s)"
+            />
 
-                    <input
-                        type="number"
-                        className="shadow-2xl"
-                        value={formData.UnidadEntrada === 0 ? '' : formData.UnidadEntrada}
-                        name="UnidadEntrada"
-                        onChange={handleChange}
-                        placeholder="Unidad Entrada"
-                    />
+            <input
+                type="number"
+                className="shadow-2xl"
+                value={formData.UnidadEntrada === 0 ? '' : formData.UnidadEntrada}
+                name="UnidadEntrada"
+                onChange={handleChange}
+                placeholder="Unidad Entrada"
+            />
 
-                    {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
+            {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
 
-                    <button type="submit" className="bg-blue-600 text-white rounded-lg py-2">
-                        Crear Proceso
-                    </button>
-                </form>
+            <button type="submit" className="bg-blue-600 text-white rounded-lg py-2">
+                Crear Proceso
+            </button>
+        </form>
     );
 };
 

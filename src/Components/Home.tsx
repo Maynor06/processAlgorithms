@@ -5,6 +5,8 @@ import SRTFSimulator from "./Simulators/SRTFSimulator";
 
 import FormProceso from "./FormProcess";
 
+import QueueProcess from "./QuequePrecess";
+
 // Definimos los algoritmos disponibles como un tipo 
 type AlgorithmKey = "srtf" | "fcfs" | "sjf" | "rr" | "priority";
 
@@ -65,9 +67,10 @@ export default function Home() {
           </div>
 
           {/* Placeholder: aquí luego pondremos QueueProcess */}
-          <div className="flex-1 border rounded-lg flex items-center justify-center text-gray-400">
-            (Aquí irá la lista de procesos)
+          <div className="flex-1 border rounded-lg flex flex-col items-center p-2 overflow-y-auto max-h-[600px]">
+            <QueueProcess />
           </div>
+
 
 
 
