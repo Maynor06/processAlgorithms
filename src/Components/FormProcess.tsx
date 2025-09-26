@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import '../styles/FormProceso.css'
 import { useProcesoContext } from '../Context/ProcessContext';
 
-const FormProceso = () => {
+interface FormProcesoProps {
+    onClose: () => void;
+}
+
+const FormProceso: React.FC<FormProcesoProps> = ({ onClose }) => {
 
     const { agregarProceso } = useProcesoContext();
     const [formData, setFormData] = useState({
@@ -12,7 +16,7 @@ const FormProceso = () => {
         UnidadEntrada: 0,
     });
 
-    const [showModal, setShowModal] = useState(false);
+    const [showModal, setShowModal] = useState(1);
     const [errorMessage, setErrorMessage] = useState('');
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,30 +43,25 @@ const FormProceso = () => {
 
         if (formData.MemoriaRequired <= 0) {
             setErrorMessage('La memoria requerida debe ser mayor a 0.');
-            setShowModal(true);
             return;
         }
 
         if (formData.MemoriaRequired >= 1024) {
             setErrorMessage('La memoria requerida debe ser menor a 1024MB (1GB).');
-            setShowModal(true);
             return;
         }
 
         if (formData.Duration <= 0) {
             setErrorMessage('La duración debe ser mayor a 0 segundos.');
-            setShowModal(true);
             return;
         }
 
         if (formData.Duration > 60) {
             setErrorMessage('La duración debe ser menor a 60 segundos.');
-            setShowModal(true);
             return;
         }
-        if(formData.UnidadEntrada < 0){
+        if (formData.UnidadEntrada < 0) {
             setErrorMessage('la unidad debe ser igual o mayor a 0')
-            setShowModal(true)
             return;
         }
 
@@ -70,7 +69,7 @@ const FormProceso = () => {
             PID: Date.now(),
             ...formData,
             // si estaba vacío, se genera automáticamente
-            NombreProceso: nombreFinal 
+            NombreProceso: nombreFinal
         };
 
         agregarProceso(newProceso);
@@ -87,18 +86,20 @@ const FormProceso = () => {
             Duration: 0,
             UnidadEntrada: 0
         });
+
+        setErrorMessage('');
+
+        onClose();
     };
 
 
     return (
-        <div className="contain-form">
-            <h1 className='font-bold text-2xl'style= {{fontFamily: "'Coiny', system-ui"}}>Crea un nuevo Proceso</h1>
-            <div className='formContain'>
-
                 <form className="form" onSubmit={handleSubmit}>
+                    <h2 className="font-bold text-xl text-center">Nuevo Proceso</h2>
+
                     <input
                         type="text"
-                        className='shadow-2xl'
+                        className="shadow-2xl"
                         value={formData.NombreProceso}
                         name="NombreProceso"
                         onChange={handleChange}
@@ -107,63 +108,37 @@ const FormProceso = () => {
 
                     <input
                         type="number"
-                        className='shadow-'
+                        className="shadow-2xl"
                         value={formData.MemoriaRequired === 0 ? '' : formData.MemoriaRequired}
-                        name='MemoriaRequired'
+                        name="MemoriaRequired"
                         onChange={handleChange}
                         placeholder="Memoria requerida (MB)"
                     />
 
                     <input
                         type="number"
-                        className='shadow-'
+                        className="shadow-2xl"
                         value={formData.Duration === 0 ? '' : formData.Duration}
-                        name='Duration'
+                        name="Duration"
                         onChange={handleChange}
                         placeholder="Duración (s)"
                     />
+
                     <input
                         type="number"
-                        className='shadow-'
+                        className="shadow-2xl"
                         value={formData.UnidadEntrada === 0 ? '' : formData.UnidadEntrada}
-                        name='UnidadEntrada'
+                        name="UnidadEntrada"
                         onChange={handleChange}
-                        placeholder='Unidad Entrada'
+                        placeholder="Unidad Entrada"
                     />
-                    <button type="submit" style={{ fontFamily: "'Coiny', system-ui" }}>Crear Proceso</button>
+
+                    {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
+
+                    <button type="submit" className="bg-blue-600 text-white rounded-lg py-2">
+                        Crear Proceso
+                    </button>
                 </form>
-            </div>
-
-            {/* Modal de error */}
-
-            {showModal && (
-                <div className="modal-overlay">
-                    <div className="modal">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth={2}
-                                stroke="red"
-                                width="50"
-                                height="50"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 
-                           9 0 0118 0z"
-                                />
-                            </svg>
-                            {/* <h2 style={{ color: 'red', margin: 0 }}>Error</h2>*/}
-                        </div>
-                        <p style={{ marginTop: '10px' }}>{errorMessage}</p>
-                        <button onClick={() => setShowModal(false)}>Cerrar</button>
-                    </div>
-                </div>
-            )}
-        </div>
     );
 };
 
