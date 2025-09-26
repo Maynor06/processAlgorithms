@@ -43,6 +43,7 @@ export default function Home() {
         <h1 className="text-xl font-bold">Simulador de procesos</h1>
       </header>
 
+
       {/* Contenido principal con grid 4 columnas */}
 
 

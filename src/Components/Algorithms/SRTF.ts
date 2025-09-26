@@ -1,37 +1,17 @@
 // src/Components/Algorithms/SRTF.ts
 
-// ===== Tipos =====
-export interface Process {
-  pid: number;
-  name: string;
-  arrivalTime: number;  // unidad de tiempo
-  burstTime: number;    // unidades de CPU requeridas
-}
 
-// Cola en un tick: pids en orden (índice 0 = 1° en cola)
-export type QueueSnapshot = number[];
+import type {
+  Process,
+  ExecutionStep,
+  ProcessResult,
+  QueueSnapshot
+} from "./common";
 
-export interface ExecutionStep {
-  time: number;            // tick ejecutado
-  processId: number;       // PID que corrió en este tick
-  processName: string;
-  remainingTime: number;   // restante DESPUÉS de este tick
-  queueBefore: QueueSnapshot; // snapshot de la ready queue ANTES de ejecutar el tick
-}
+import { TIME_UNIT } from "./common";
 
-export interface ProcessResult {
-  pid: number;
-  name: string;
-  arrivalTime: number;
-  burstTime: number;
-  finishTime: number;      // cf
-  turnaroundTime: number;  // Tr = cf - ti
-  waitingTime: number;     // Te = Tr - τ
-  serviceIndex: number;    // Is = τ / Tr
-}
 
-// ===== Config global usada por la UI =====
-export const TIME_UNIT = 1000; // ms (1s por defecto)
+
 
 // ===== Utilidad: desempate SRTF (preempte también en empate) =====
 function betterCandidate(a: Process, b: Process, remaining: Record<number, number>): Process {

@@ -1,11 +1,10 @@
 // src/Components/Simulators/SRTFSimulator.tsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { createSRTFEngine, TIME_UNIT } from "../Algorithms/SRTF";
-import type {
-  Process,
-  ExecutionStep,
-  ProcessResult,
-} from "../Algorithms/SRTF";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createSRTFEngine } from "../Algorithms/SRTF";
+import { TIME_UNIT } from "../Algorithms/common";
+import type { Process, ExecutionStep, ProcessResult } from "../Algorithms/common";
+
+
 
 /** Color estable por PID (HSL) */
 function colorForPid(pid: number) {
@@ -15,6 +14,8 @@ function colorForPid(pid: number) {
 
 /** Componente simulador SRTF: renderiza Visualización (Gantt) + Resultados */
 export default function SRTFSimulator() {
+
+
   // --- Procesos iniciales (sin inputs por ahora; luego vendrán por props/estado global) ---
 
   
@@ -75,6 +76,7 @@ const initial: Process[] = [
       }
       return;
     }
+
     timerRef.current = window.setInterval(() => {
       const done = engineRef.current!.tick();
       if (done && timerRef.current) {
@@ -82,6 +84,7 @@ const initial: Process[] = [
         timerRef.current = null;
       }
     }, TIME_UNIT);
+    
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
