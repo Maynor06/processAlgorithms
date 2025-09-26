@@ -1,7 +1,9 @@
 // src/Components/Home.tsx
 import React, { useState } from "react";
-// Importamos el simulador de SRTF (está en la carpeta Simulators)
+
+// Importamos el simulador de SRTF // Simuladores
 import SRTFSimulator from "./Simulators/SRTFSimulator";
+import SJFSimulator from "./Simulators/SJFSimulator";
 
 // Definimos los algoritmos disponibles como un tipo 
 type AlgorithmKey = "srtf" | "fcfs" | "sjf" | "rr" | "priority";
@@ -18,9 +20,12 @@ export default function Home() {
       case "srtf":
         return <SRTFSimulator />;
 
+      case "sjf": // NUEVO
+        return <SJFSimulator />;
+
 
       // case "fcfs": return <FCFSSimulator />;
-      // case "sjf":  return <SJFSimulator />;
+
       // case "rr":   return <RoundRobinSimulator />;
       // case "priority": return <PrioritySimulator />;
 

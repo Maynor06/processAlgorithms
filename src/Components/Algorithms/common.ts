@@ -1,7 +1,7 @@
 // src/Components/Algorithms/common.ts
 
 // ===== Config global usada por la UI =====
-export const TIME_UNIT = 1000; // ms (1s por defecto)
+export const TIME_UNIT = 500; // ms (1s por defecto)
 
 // ===== Tipos comunes a todos los algoritmos =====
 
