@@ -2,17 +2,21 @@
 
 // ===== Tipos =====
 export interface Process {
-  pid: number;          // identificador único
-  name: string;         // nombre del proceso (A, B, C, ...)
-  arrivalTime: number;  // instante de llegada (unidad de tiempo)
-  burstTime: number;    // tiempo total requerido en CPU (unidades)
+  pid: number;
+  name: string;
+  arrivalTime: number;  // unidad de tiempo
+  burstTime: number;    // unidades de CPU requeridas
 }
 
+// Cola en un tick: pids en orden (índice 0 = 1° en cola)
+export type QueueSnapshot = number[];
+
 export interface ExecutionStep {
-  time: number;         // tiempo (tick) en el que se ejecuta este paso
-  processId: number;    // pid del proceso que corrió en este tick
-  processName: string;  // nombre del proceso
-  remainingTime: number;// tiempo restante DESPUÉS de ejecutar este tick
+  time: number;            // tick ejecutado
+  processId: number;       // PID que corrió en este tick
+  processName: string;
+  remainingTime: number;   // restante DESPUÉS de este tick
+  queueBefore: QueueSnapshot; // snapshot de la ready queue ANTES de ejecutar el tick
 }
 
 export interface ProcessResult {
@@ -26,134 +30,204 @@ export interface ProcessResult {
   serviceIndex: number;    // Is = τ / Tr
 }
 
-// ===== Config global (usada por la UI para la animación) =====
-export const TIME_UNIT = 1000; // ms → 1 seg por defecto
+// ===== Config global usada por la UI =====
+export const TIME_UNIT = 1000; // ms (1s por defecto)
 
-// ===== Algoritmo SRTF =====
-// - Preemptivo: si llega un proceso con MENOR tiempo restante, interrumpe.
-// - Desempate (remainingTime iguales):
-//   1) favorece al que llegó más tarde (preempte en empate)
-//   2) si sigue el empate, favorece PID mayor (estable y determinista)
-export function runSRTF(processes: Process[]): {
-  history: ExecutionStep[];
-  results: ProcessResult[];
-} {
-  // Copias inmutables de entrada
+// ===== Utilidad: desempate SRTF (preempte también en empate) =====
+function betterCandidate(a: Process, b: Process, remaining: Record<number, number>): Process {
+  const ra = remaining[a.pid];
+  const rb = remaining[b.pid];
+  if (ra < rb) return a;
+  if (rb < ra) return b;
+  // empate: 1) favorece llegada más tarde
+  if (a.arrivalTime > b.arrivalTime) return a;
+  if (b.arrivalTime > a.arrivalTime) return b;
+  // 2) si persiste, PID mayor
+  return a.pid >= b.pid ? a : b;
+}
+
+// ===== Motor "offline" (pruebas rápidas) =====
+export function runSRTF(processes: Process[]): { history: ExecutionStep[]; results: ProcessResult[] } {
   const procs = processes.map(p => ({ ...p }));
+  const remaining: Record<number, number> = {};
+  procs.forEach(p => (remaining[p.pid] = p.burstTime));
 
-  // Tiempos restantes por PID
-  const remainingTime: Record<number, number> = {};
-  procs.forEach(p => (remainingTime[p.pid] = p.burstTime));
-
-  // Estructuras de control
-  let currentTime = 0;
+  const totalBurst = procs.reduce((a, p) => a + p.burstTime, 0);
+  const ready: Process[] = [];
   const finished = new Set<number>();
-  const readyQueue: Process[] = [];
   const history: ExecutionStep[] = [];
   const results: ProcessResult[] = [];
 
-  // Para saber cuándo parar más rápido
-  const totalBurst = procs.reduce((acc, p) => acc + p.burstTime, 0);
-  let executedTicks = 0;
+  let t = 0, executed = 0;
 
-  // Helper: añadir recién llegados al tick actual
   const enqueueArrivals = () => {
-    for (const p of procs) {
-      if (p.arrivalTime === currentTime) {
-        readyQueue.push(p);
-      }
-    }
+    for (const p of procs) if (p.arrivalTime === t) ready.push(p);
   };
 
-  // Helper: elegir siguiente proceso bajo SRTF con desempate
-  const pickNext = (): Process | null => {
-    if (readyQueue.length === 0) return null;
-    return readyQueue.reduce((best, p) => {
-      const rb = remainingTime[best.pid];
-      const rp = remainingTime[p.pid];
-
-      if (rp < rb) return p;
-      if (rp === rb) {
-        // 1) llegó más tarde → prioridad
-        if (p.arrivalTime > best.arrivalTime) return p;
-        // 2) si siguen empatados → PID mayor
-        if (p.arrivalTime === best.arrivalTime && p.pid > best.pid) return p;
-      }
-      return best;
-    });
-  };
-
-  while (executedTicks < totalBurst) {
-    // 1) Encolar procesos que llegan en el tiempo actual
+  while (executed < totalBurst) {
     enqueueArrivals();
 
-    // 2) Elegir SRTF
-    const currentProcess = pickNext();
+    // snapshot ordenado de la cola ANTES de correr el tick
+    const ordered = [...ready].sort((a, b) => {
+      const ra = remaining[a.pid], rb = remaining[b.pid];
+      if (ra !== rb) return ra - rb;
+      if (a.arrivalTime !== b.arrivalTime) return b.arrivalTime - a.arrivalTime;
+      return b.pid - a.pid;
+    });
+    const queueBefore: QueueSnapshot = ordered.map(p => p.pid);
 
-    if (currentProcess) {
-      // Ejecutar 1 unidad
-      remainingTime[currentProcess.pid] -= 1;
-      executedTicks += 1;
+    let current: Process | null = null;
+    if (ready.length) {
+      current = ready.reduce((best, p) => betterCandidate(best, p, remaining));
+    }
+
+    if (current) {
+      remaining[current.pid] -= 1;
+      executed += 1;
 
       history.push({
-        time: currentTime,
-        processId: currentProcess.pid,
-        processName: currentProcess.name,
-        remainingTime: remainingTime[currentProcess.pid],
+        time: t,
+        processId: current.pid,
+        processName: current.name,
+        remainingTime: remaining[current.pid],
+        queueBefore
       });
 
-      // ¿Terminó?
-      if (remainingTime[currentProcess.pid] === 0) {
-        const finishTime = currentTime + 1; // termina al cerrar este tick
-        const turnaroundTime = finishTime - currentProcess.arrivalTime;
-        const waitingTime = turnaroundTime - currentProcess.burstTime;
-        const serviceIndex =
-          turnaroundTime > 0
-            ? currentProcess.burstTime / turnaroundTime
-            : 0;
-
+      if (remaining[current.pid] === 0) {
+        const finishTime = t + 1;
+        const Tr = finishTime - current.arrivalTime;
+        const Te = Tr - current.burstTime;
+        const Is = Tr > 0 ? current.burstTime / Tr : 0;
         results.push({
-          pid: currentProcess.pid,
-          name: currentProcess.name,
-          arrivalTime: currentProcess.arrivalTime,
-          burstTime: currentProcess.burstTime,
-          finishTime,
-          turnaroundTime,
-          waitingTime,
-          serviceIndex,
+          pid: current.pid, name: current.name,
+          arrivalTime: current.arrivalTime, burstTime: current.burstTime,
+          finishTime, turnaroundTime: Tr, waitingTime: Te, serviceIndex: Is
         });
-
-        finished.add(currentProcess.pid);
-        // Sacarlo de la cola de listos
-        const idx = readyQueue.findIndex(p => p.pid === currentProcess.pid);
-        if (idx !== -1) readyQueue.splice(idx, 1);
+        finished.add(current.pid);
+        const idx = ready.findIndex(p => p.pid === current!.pid);
+        if (idx !== -1) ready.splice(idx, 1);
       }
     }
 
-    // 3) Avanzar el tiempo
-    currentTime += 1;
+    t += 1;
 
-    // Si la cola está vacía y aún faltan procesos por llegar,
-    // podemos seguir avanzando el tiempo hasta la próxima llegada.
-    if (readyQueue.length === 0 && executedTicks < totalBurst) {
+    if (!ready.length && executed < totalBurst) {
       const nextArrival = procs
-        .filter(p => !finished.has(p.pid) && p.arrivalTime > currentTime - 1)
-        .reduce<number | null>((min, p) => {
-          return min === null ? p.arrivalTime : Math.min(min, p.arrivalTime);
-        }, null);
+        .filter(p => !finished.has(p.pid) && p.arrivalTime >= t)
+        .reduce<number | null>((min, p) => (min === null ? p.arrivalTime : Math.min(min, p.arrivalTime)), null);
+      if (nextArrival !== null && nextArrival > t) t = nextArrival;
+    }
+  }
 
-      if (nextArrival !== null && nextArrival > currentTime) {
-        // saltar directo al siguiente instante con llegadas
-        while (currentTime < nextArrival) {
-          enqueueArrivals(); // no encolará hasta que coincida
-          currentTime += 1;
+  results.sort((a, b) => a.name.localeCompare(b.name));
+  return { history, results };
+}
+
+// ===== Motor incremental con "addProcess" y callbacks =====
+type StepCb = (step: ExecutionStep) => void;
+type FinishCb = (result: ProcessResult) => void;
+type CompleteCb = (finalResults: ProcessResult[]) => void;
+
+export function createSRTFEngine(opts?: { startTime?: number }) {
+  let t = opts?.startTime ?? 0;
+  const remaining: Record<number, number> = {};
+  const ready: Process[] = [];
+  const all: Map<number, Process> = new Map();
+  const finished = new Set<number>();
+  const results: ProcessResult[] = [];
+
+  let totalBurst = 0;
+  let executed = 0;
+
+  let onStep: StepCb | null = null;
+  let onFinish: FinishCb | null = null;
+  let onComplete: CompleteCb | null = null;
+
+  function addProcess(p: Process) {
+    if (all.has(p.pid)) return;
+    all.set(p.pid, { ...p });
+    remaining[p.pid] = p.burstTime;
+    totalBurst += p.burstTime;
+    if (p.arrivalTime <= t) ready.push(p);
+  }
+
+  function enqueueArrivalsAt(time: number) {
+    for (const p of all.values()) {
+      if (p.arrivalTime === time) {
+        if (!ready.find(r => r.pid === p.pid) && remaining[p.pid] > 0) {
+          ready.push(p);
         }
       }
     }
   }
 
-  // Ordenar resultados por nombre (opcional, coherente con UI)
-  results.sort((a, b) => a.name.localeCompare(b.name));
+  function orderedQueueSnapshot(): QueueSnapshot {
+    const ordered = [...ready].sort((a, b) => {
+      const ra = remaining[a.pid], rb = remaining[b.pid];
+      if (ra !== rb) return ra - rb;
+      if (a.arrivalTime !== b.arrivalTime) return b.arrivalTime - a.arrivalTime;
+      return b.pid - a.pid;
+    });
+    return ordered.map(p => p.pid);
+  }
 
-  return { history, results };
+  function pick(): Process | null {
+    if (!ready.length) return null;
+    return ready.reduce((best, p) => betterCandidate(best, p, remaining));
+  }
+
+  function tick(): boolean {
+    enqueueArrivalsAt(t);
+
+    const queueBefore = orderedQueueSnapshot();
+    const current = pick();
+    if (current) {
+      remaining[current.pid] -= 1;
+      executed += 1;
+
+      onStep?.({
+        time: t,
+        processId: current.pid,
+        processName: current.name,
+        remainingTime: remaining[current.pid],
+        queueBefore
+      });
+
+      if (remaining[current.pid] === 0) {
+        const finishTime = t + 1;
+        const Tr = finishTime - current.arrivalTime;
+        const Te = Tr - current.burstTime;
+        const Is = Tr > 0 ? current.burstTime / Tr : 0;
+        const res: ProcessResult = {
+          pid: current.pid, name: current.name,
+          arrivalTime: current.arrivalTime, burstTime: current.burstTime,
+          finishTime, turnaroundTime: Tr, waitingTime: Te, serviceIndex: Is
+        };
+        results.push(res);
+        onFinish?.(res);
+        finished.add(current.pid);
+        const idx = ready.findIndex(p => p.pid === current.pid);
+        if (idx !== -1) ready.splice(idx, 1);
+      }
+    }
+
+    t += 1;
+
+    const done = executed >= totalBurst;
+    if (done) {
+      results.sort((a, b) => a.name.localeCompare(b.name));
+      onComplete?.(results.slice());
+    }
+    return done;
+  }
+
+  return {
+    addProcess,
+    tick,
+    now: () => t,
+    stats: () => ({ executed, totalBurst }),
+    onStep: (cb: StepCb | null) => (onStep = cb),
+    onFinish: (cb: FinishCb | null) => (onFinish = cb),
+    onComplete: (cb: CompleteCb | null) => (onComplete = cb),
+  };
 }
