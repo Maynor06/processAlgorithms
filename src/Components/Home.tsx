@@ -46,7 +46,7 @@ export default function Home() {
       {/* Contenido principal con grid 4 columnas */}
 
 
-      <main className="flex-1 p-4 grid grid-cols-4 gap-4">
+      <main className="flex-1 p-4 grid grid-cols-4 gap-4 min-h-0">
         
 <div className="col-span-1 flex flex-col bg-white shadow rounded-xl p-4">
           <h2 className="text-lg font-bold mb-2">Lista de Procesos</h2>
@@ -88,7 +88,7 @@ export default function Home() {
 
 
         {/* Columna derecha: renderiza el simulador seleccionado */}
-        <div className="col-span-3 flex flex-col gap-4">{renderSimulator()}</div>
+        <div className="col-span-3 min-h-0 h-full flex flex-col gap-4 overflow-y-auto pr-1">{renderSimulator()}</div>
       </main>
 
       {/* Pie de página */}

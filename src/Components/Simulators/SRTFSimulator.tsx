@@ -16,14 +16,25 @@ function colorForPid(pid: number) {
 /** Componente simulador SRTF: renderiza Visualización (Gantt) + Resultados */
 export default function SRTFSimulator() {
   // --- Procesos iniciales (sin inputs por ahora; luego vendrán por props/estado global) ---
-  const initial: Process[] = [
-    { pid: 1, name: "A", arrivalTime: 0, burstTime: 8 }, // largo, arranca primero
-    { pid: 2, name: "B", arrivalTime: 1, burstTime: 4 }, // preempta a A en t=1
-    { pid: 3, name: "C", arrivalTime: 2, burstTime: 2 }, // preempta a B en t=2
-    { pid: 4, name: "D", arrivalTime: 3, burstTime: 6 }, // entra a cola mientras C termina
-    { pid: 5, name: "E", arrivalTime: 4, burstTime: 1 }, // toma CPU en t=4 por ser el más corto
 
-  ];
+  
+const initial: Process[] = [
+  { pid: 1,  name: "A", arrivalTime: 0,  burstTime: 4 },
+  { pid: 2,  name: "B", arrivalTime: 1,  burstTime: 3 },
+  { pid: 3,  name: "C", arrivalTime: 2,  burstTime: 1 }, // fuerza preemption temprana
+  { pid: 4,  name: "D", arrivalTime: 3,  burstTime: 2 },
+  { pid: 5,  name: "E", arrivalTime: 3,  burstTime: 6 },
+  { pid: 6,  name: "F", arrivalTime: 4,  burstTime: 5 },
+  { pid: 7,  name: "G", arrivalTime: 5,  burstTime: 2 },
+  { pid: 8,  name: "H", arrivalTime: 6,  burstTime: 4 },
+  { pid: 9,  name: "I", arrivalTime: 7,  burstTime: 3 },
+  { pid: 10, name: "J", arrivalTime: 8,  burstTime: 1 }, // otro corto para SRTF
+  { pid: 11, name: "K", arrivalTime: 9,  burstTime: 2 },
+  { pid: 12, name: "L", arrivalTime: 10, burstTime: 4 },
+  { pid: 13, name: "M", arrivalTime: 11, burstTime: 2 },
+  { pid: 14, name: "N", arrivalTime: 12, burstTime: 3 },
+  { pid: 15, name: "O", arrivalTime: 13, burstTime: 5 },
+];
 
   // Mapa PID -> Nombre (para mostrar filas desde que entran a cola)
   const [procNameMap, setProcNameMap] = useState<Map<number, string>>(
@@ -99,7 +110,7 @@ export default function SRTFSimulator() {
   */
 
   // --- Derivados para la visualización ---
-  const MAX_COLS = 40;
+  const MAX_COLS = 100;
 
   // t -> pid que ejecutó ese tick
   const runningByTime = useMemo(() => {
