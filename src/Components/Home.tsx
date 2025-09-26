@@ -1,6 +1,5 @@
-// imports iguales…
-import React from "react";
-import { runSRTF } from "../Components/Algorithms/SRTF";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { runSRTF, TIME_UNIT } from "../Components/Algorithms/SRTF";
 import type { Process } from "../Components/Algorithms/SRTF";
 
 export default function Home() {
@@ -10,9 +9,63 @@ export default function Home() {
     { pid: 3, name: "C", arrivalTime: 3, burstTime: 3 },
   ];
 
-  const { history, results } = runSRTF(exampleProcesses);
+  const { history, results } = useMemo(() => runSRTF(exampleProcesses), []);
 
-  // ⬇️ promedio de la última columna (serviceIndex)
+  const [isRunning, setIsRunning] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
+  const [currentTick, setCurrentTick] = useState(0);
+
+  const totalTicks = useMemo(
+    () => (history.length ? history[history.length - 1].time + 1 : 0),
+    [history]
+  );
+
+  const timerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!isRunning || isPaused || currentTick >= totalTicks) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      return;
+    }
+
+    timerRef.current = window.setInterval(() => {
+      setCurrentTick((t) => {
+        const nxt = Math.min(t + 1, totalTicks);
+        if (nxt >= totalTicks && timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+        return nxt;
+      });
+    }, TIME_UNIT);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [isRunning, isPaused, currentTick, totalTicks]);
+
+  const processRows = useMemo(
+    () =>
+      [...new Map(exampleProcesses.map((p) => [p.pid, p])).values()].sort((a, b) =>
+        a.name.localeCompare(b.name)
+      ),
+    [exampleProcesses]
+  );
+
+  const byTime = useMemo(() => {
+    const m = new Map<number, number>();
+    for (const step of history) {
+      m.set(step.time, step.processId);
+    }
+    return m;
+  }, [history]);
+
   const avgService =
     results.length === 0
       ? 0
@@ -24,69 +77,72 @@ export default function Home() {
         <h1 className="text-xl font-bold">Simulador de procesos</h1>
       </header>
 
-
-
       <main className="flex-1 p-4 grid grid-cols-4 gap-4">
-
-
-        {/* Columna izquierda */}
-        <div className="col-span-1 flex flex-col bg-white shadow rounded-xl p-4">
-          <h2 className="text-lg font-bold mb-2">Lista de Procesos</h2>
-
-
-          {/* Placeholder: aquí luego pondremos QueueProcess */}
-          <div className="flex-1 border rounded-lg flex items-center justify-center text-gray-400">
-            (Aquí irá la lista de procesos)
-          </div>
-
-          
-
-            {/* Selector de algoritmo */}
-            <label className="text-sm font-medium mb-1">Algoritmo:</label>
-            <select
-            className="mb-4 p-2 border rounded-lg w-full text-sm"
-            defaultValue=""
-            >
-            <option value="" disabled>
-                Selecciona un algoritmo
-            </option>
-            <option value="fcfs">FCFS (First Come, First Served)</option>
-            <option value="sjf">SJF (Shortest Job First)</option>
-            <option value="srtf">SRTF (Shortest Remaining Time First)</option>
-            <option value="roundrobin">Round Robin</option>
-            <option value="priority">Por Prioridad</option>
-            </select>
-
-
-          {/* Placeholder: aquí luego pondremos Controls */}
-          <div className="mt-4">
-            <button className="w-full bg-blue-600 text-white py-2 rounded-lg">
-              Simular Procesos
-            </button>
-          </div>
-        </div>
-
-
-
-
-
-
+        {/* Columna izquierda vacía */}
+        <div className="col-span-1 bg-white shadow rounded-xl p-4" />
 
         {/* Columna derecha */}
         <div className="col-span-3 flex flex-col gap-4">
-          {/* Visualización */}
+          {/* === Visualización === */}
           <div className="flex-1 bg-white shadow rounded-xl p-4">
-            <h2 className="text-lg font-bold mb-2">Visualización</h2>
-            <div className="text-sm font-mono whitespace-pre">
-              {history.map((step) => (
-                <div key={step.time}>
-                  t={step.time}: Proceso {step.processName} (resta {step.remainingTime})
-                </div>
-              ))}
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-bold">Visualización</h2>
+              <div className="text-xs text-gray-500">
+                TIME_UNIT: {TIME_UNIT} ms · Estado:{" "}
+                {isRunning ? (isPaused ? "Pausado" : "Corriendo") : "Detenido"} ·
+                t={currentTick}/{totalTicks}
+              </div>
+            </div>
+
+            {/* Gantt */}
+            <div className="border rounded-lg overflow-auto">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-100 sticky top-0">
+                  <tr>
+                    <th className="p-2 border text-left min-w-[80px]">Proceso</th>
+                    {Array.from({ length: totalTicks }).map((_, t) => (
+                      <th
+                        key={t}
+                        className={
+                          "border px-2 py-1 font-normal " +
+                          (t === currentTick - 1 ? "bg-blue-50" : "")
+                        }
+                      >
+                        {t}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {processRows.map((p) => (
+                    <tr key={p.pid} className="odd:bg-white even:bg-gray-50">
+                      <td className="p-2 border font-medium">{p.name}</td>
+                      {Array.from({ length: totalTicks }).map((_, t) => {
+                        const runningPid = byTime.get(t);
+                        const isFilled = t < currentTick && runningPid === p.pid;
+                        const isNow = t === currentTick - 1;
+
+                        return (
+                          <td
+                            key={t}
+                            className={
+                              "border text-center align-middle h-6 min-w-[28px] " +
+                              (isFilled ? "bg-blue-500/70 text-white" : "") +
+                              (!isFilled && isNow ? " bg-blue-50" : "")
+                            }
+                          >
+                            {isFilled ? "■" : ""}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
-          {/* Resultados */}
+          {/* === Resultados === */}
           <div className="bg-white shadow rounded-xl p-4">
             <h2 className="text-lg font-bold mb-2">Resultados</h2>
             <table className="w-full text-sm border">
@@ -114,14 +170,10 @@ export default function Home() {
                   </tr>
                 ))}
               </tbody>
-
-              {/* ⬇️ Fila de promedio, discreta y sin estorbar */}
               <tfoot>
                 <tr className="bg-gray-50">
-                  <td className="p-1 border text-gray-700">
-                    Promedio índice:
-                  </td>
-                  <td className="p-1 border text-gray-500" colSpan={5}></td>
+                  <td className="p-1 border text-gray-700">Promedio índice:</td>
+                  <td className="p-1 border" colSpan={5}></td>
                   <td className="p-1 border font-semibold">
                     {avgService.toFixed(2)}
                   </td>
