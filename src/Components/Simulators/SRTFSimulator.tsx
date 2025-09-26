@@ -2,9 +2,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createSRTFEngine } from "../Algorithms/SRTF";
 import { TIME_UNIT } from "../Algorithms/common";
+import { getInitialProcesses } from "../../data/processes";
 import type { Process, ExecutionStep, ProcessResult } from "../Algorithms/common";
-
-
 
 /** Color estable por PID (HSL) */
 function colorForPid(pid: number) {
@@ -14,35 +13,15 @@ function colorForPid(pid: number) {
 
 /** Componente simulador SRTF: renderiza Visualización (Gantt) + Resultados */
 export default function SRTFSimulator() {
+  // Procesos iniciales desde módulo de datos
+  const [data] = useState<Process[]>(getInitialProcesses);
 
-
-  // --- Procesos iniciales (sin inputs por ahora; luego vendrán por props/estado global) ---
-
-  
-const initial: Process[] = [
-  { pid: 1,  name: "A", arrivalTime: 0,  burstTime: 4 },
-  { pid: 2,  name: "B", arrivalTime: 1,  burstTime: 3 },
-  { pid: 3,  name: "C", arrivalTime: 2,  burstTime: 1 }, // fuerza preemption temprana
-  { pid: 4,  name: "D", arrivalTime: 3,  burstTime: 2 },
-  { pid: 5,  name: "E", arrivalTime: 3,  burstTime: 6 },
-  { pid: 6,  name: "F", arrivalTime: 4,  burstTime: 5 },
-  { pid: 7,  name: "G", arrivalTime: 5,  burstTime: 2 },
-  { pid: 8,  name: "H", arrivalTime: 6,  burstTime: 4 },
-  { pid: 9,  name: "I", arrivalTime: 7,  burstTime: 3 },
-  { pid: 10, name: "J", arrivalTime: 8,  burstTime: 1 }, // otro corto para SRTF
-  { pid: 11, name: "K", arrivalTime: 9,  burstTime: 2 },
-  { pid: 12, name: "L", arrivalTime: 10, burstTime: 4 },
-  { pid: 13, name: "M", arrivalTime: 11, burstTime: 2 },
-  { pid: 14, name: "N", arrivalTime: 12, burstTime: 3 },
-  { pid: 15, name: "O", arrivalTime: 13, burstTime: 5 },
-];
-
-  // Mapa PID -> Nombre (para mostrar filas desde que entran a cola)
+  // Mapa PID -> Nombre
   const [procNameMap, setProcNameMap] = useState<Map<number, string>>(
-    new Map(initial.map((p) => [p.pid, p.name]))
+    () => new Map(getInitialProcesses().map((p) => [p.pid, p.name]))
   );
 
-  // --- Estados de simulación/visualización ---
+  // --- Estados de simulación ---
   const [steps, setSteps] = useState<ExecutionStep[]>([]);
   const [results, setResults] = useState<ProcessResult[]>([]);
   const [isRunning, setIsRunning] = useState(true);
@@ -56,19 +35,21 @@ const initial: Process[] = [
   useEffect(() => {
     const eng = createSRTFEngine({ startTime: 0 });
 
-    // procesos iniciales
-    initial.forEach(eng.addProcess);
+    data.forEach(eng.addProcess);
 
     eng.onStep((s) => setSteps((xs) => [...xs, s]));
     eng.onFinish((r) => setResults((rs) => [...rs, r]));
     eng.onComplete(() => setIsComplete(true));
 
     engineRef.current = eng;
-  }, []);
+
+    setProcNameMap(new Map(data.map((p) => [p.pid, p.name])));
+  }, [data]);
 
   // Intervalo que avanza tick a tick
   useEffect(() => {
     if (!engineRef.current) return;
+
     if (!isRunning || isPaused || isComplete) {
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -84,7 +65,7 @@ const initial: Process[] = [
         timerRef.current = null;
       }
     }, TIME_UNIT);
-    
+
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -93,52 +74,29 @@ const initial: Process[] = [
     };
   }, [isRunning, isPaused, isComplete]);
 
-  // (Ejemplo opcional) agregar un proceso “en caliente” en t=5
-  // Descomenta para probar entradas dinámicas antes de tener inputs:
-  /*
-  useEffect(() => {
-    if (!engineRef.current) return;
-    const id = window.setTimeout(() => {
-      const now = engineRef.current!.now();
-      const p: Process = { pid: 8, name: "H", arrivalTime: now, burstTime: 2 };
-      engineRef.current!.addProcess(p);
-      setProcNameMap((m) => {
-        const c = new Map(m);
-        c.set(p.pid, p.name);
-        return c;
-      });
-    }, 5 * TIME_UNIT);
-    return () => clearTimeout(id);
-  }, []);
-  */
-
   // --- Derivados para la visualización ---
   const MAX_COLS = 100;
 
-  // t -> pid que ejecutó ese tick
   const runningByTime = useMemo(() => {
     const m = new Map<number, number>();
     steps.forEach((s) => m.set(s.time, s.processId));
     return m;
   }, [steps]);
 
-  // t -> (pid -> posición en cola 1..n)  (ANTES del tick, excluye al que correrá)
   const queuePosByTime = useMemo(() => {
     const map = new Map<number, Map<number, number>>();
     steps.forEach((s) => {
       const inner = new Map<number, number>();
       s.queueBefore.forEach((pid, idx) => {
-        if (idx > 0) inner.set(pid, idx); // idx=1 -> "1", idx=2 -> "2", ...
+        if (idx > 0) inner.set(pid, idx);
       });
       map.set(s.time, inner);
     });
     return map;
   }, [steps]);
 
-  // Filas del Gantt: incluir pids que ejecutaron, que estaban en cola o ya terminaron
   const procRows = useMemo(() => {
     const seen = new Set<number>();
-
     steps.forEach((s) => {
       seen.add(s.processId);
       s.queueBefore.forEach((pid) => seen.add(pid));
@@ -153,13 +111,11 @@ const initial: Process[] = [
     return rows;
   }, [steps, results, procNameMap]);
 
-  // Promedio del índice solo cuando todo finaliza
   const avgService =
     isComplete && results.length
       ? results.reduce((a, r) => a + r.serviceIndex, 0) / results.length
       : null;
 
-  // Tiempo actual (solo informativo)
   const currentTick = steps.length ? steps[steps.length - 1].time + 1 : 0;
 
   return (
