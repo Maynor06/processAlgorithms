@@ -20,8 +20,13 @@ const QuequeProcess = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -50 }}
                                     transition={{ duration: 0.5 }}
-                                    className="bg-[#F8F8FF] w-[85%] p-4 ml-auto mr-auto mt-6 mb-2 text-center rounded-2xl shadow-2xl"
+                                     className="relative bg-[#F8F8FF] w-[85%] p-4 ml-auto mr-auto mt-6 mb-2 text-center rounded-2xl shadow-2xl"
                                 >
+                                    <button className="absolute top-3 right-3 px-2 py-0 bg-red-500 text-white rounded" onClick={() => finalizarProceso(proceso.PID)}>
+                                        ×
+                                    </button>
+
+                                    
                                     <p className="text-[#A9A9A9] text-[12px] " >{proceso.PID} </p>
                                     <h2 className="font-bold text-2xl " >{proceso.NombreProceso}</h2>
                                     <p className="text-[17px] " >Memoria requerida: {proceso.MemoriaRequired} Mb</p>
@@ -30,9 +35,7 @@ const QuequeProcess = () => {
                                     <p>Unidad de Entrada: {proceso.UnidadEntrada}</p>
                                     <p>Quantum: {proceso.Quantum}</p>
 
-                                    <button className="mt-2 px-4 py-1 bg-red-500 text-white rounded" onClick={() => finalizarProceso(proceso.PID)}>
-                                        Eliminar
-                                    </button>
+                                    
                                 </motion.div>
                             ))
                         ) : <motion.div className="flex items-center justify-center h-100 w-full text-center text-sm text-gray-300" initial={{opacity:0}} animate={{opacity:1}} style = {{fontFamily: "'Press Start 2P', system-ui"}} >Lista vacia</motion.div>}

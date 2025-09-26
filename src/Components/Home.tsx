@@ -45,7 +45,7 @@ export default function Home() {
   return (
     <div className="h-screen w-full flex flex-col bg-gray-100">
       {/* Encabezado principal */}
-      <header className="bg-blue-600 text-white py-4 px-6 shadow">
+      <header className="bg-[#1d293d] text-white py-4 px-6 shadow">
         <h1 className="text-xl font-bold">Simulador de procesos</h1>
       </header>
 
@@ -61,7 +61,7 @@ export default function Home() {
 
             {/* Botón para abrir modal */}
             <button
-              className="bg-green-500 text-white px-3 py-1 rounded-lg text-sm"
+              className="bg-[#314158] text-white px-3 py-1 rounded-lg text-sm"
               onClick={() => setShowModal(true)}
             > + Nuevo </button>
           </div>
@@ -93,7 +93,7 @@ export default function Home() {
 
           {/* Placeholder: aquí luego pondremos Controls */}
           <div className="mt-4">
-            <button className="w-full bg-blue-600 text-white py-2 rounded-lg">
+            <button className="w-full bg-[#314158] text-white py-2 rounded-lg font-bold">
               Simular Procesos
             </button>
           </div>
@@ -107,7 +107,7 @@ export default function Home() {
       </main>
 
       {/* Pie de página */}
-      <footer className="bg-gray-800 text-white py-3 text-center">
+      <footer className="bg-gray-800 text-white py-1 text-center">
         Pie de página
       </footer>
 
@@ -118,10 +118,10 @@ export default function Home() {
           <div className="bg-white rounded-xl shadow-lg p-6 w-[400px] relative">
             {/* Botón de cerrar */}
             <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+              className="absolute top-3 right-3 px-2 py-0 bg-red-500 text-white rounded"
               onClick={() => setShowModal(false)}
             >
-              ✖
+              ×
             </button>
 
             {/* Aquí metemos el formulario */}

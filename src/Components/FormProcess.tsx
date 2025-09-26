@@ -172,7 +172,7 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose, algoritmo }) => {
 
             {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
 
-            <button type="submit" className="bg-blue-600 text-white rounded-lg py-2">
+            <button type="submit" className="bg-[#314158] text-white rounded-lg py-2">
                 Crear Proceso
             </button>
         </form>
