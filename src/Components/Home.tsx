@@ -8,6 +8,7 @@ import SJFSimulator from "./Simulators/SJFSimulator";
 
 import FormProceso from "./FormProcess";
 import QueueProcess from "./QuequePrecess";
+import RoundRobinSimulator from "./Simulators/RoundRobinSimulator";
 
 type AlgorithmKey = "srtf" | "fcfs" | "sjf" | "rr" | "priority";
 
@@ -40,7 +41,7 @@ export default function Home() {
   }
     setIsRunning(true);
     setIsPaused(false);
-    setResetFlag(false);
+    setResetFlag(true);
   };
 
   const handlePause = () => {
@@ -66,7 +67,6 @@ export default function Home() {
             resetFlag={resetFlag}
           />
         );
-
         case "fcfs":
           return (
             <FCFSSimulator
@@ -75,8 +75,6 @@ export default function Home() {
               resetFlag={resetFlag}
             />
           );
-
-
         case "sjf":
           return (
             <SJFSimulator
@@ -85,8 +83,12 @@ export default function Home() {
               resetFlag={resetFlag}
             />
           );
-      // case "rr": return <RoundRobinSimulator ... />;
-      // case "priority": return <PrioritySimulator ... />;
+        case "rr": return <RoundRobinSimulator 
+          isRunning = {isRunning}
+          isPaused = {isPaused}
+          resetFlag = {resetFlag}
+          quantum={formData.Quantum}
+        />;
       default:
         return (
           <div className="bg-white shadow rounded-xl p-6 text-center text-gray-500">
