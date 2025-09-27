@@ -4,17 +4,13 @@ import { useState } from "react";
 import { useProcesoContext } from "../Context/ProcessContext";
 import FormProceso from "./FormProcess";
 import QuequeProcess from "./QuequePrecess";
-import Landing from "./Landing"; // Importe del Landing    
 
 const Home = () => {
 
-    const navigate = useNavigate()
     const [showModal, setShowModal] = useState(false);
     const [errorMessage, setErrorMessage] = useState("")
     const [algorithm, setAlgorithm]  = useState("")
 
-//controlar si utiliza el Landing o no
-    const [showLanding, setShowLanding] = useState(true);
 
     const algorithmOptions = [
     { value: "FCFS", nombre: "First Come First Served" },
@@ -58,12 +54,6 @@ const Home = () => {
         }
         // aca va a ir la logica para ir al componente de x proceso
     }
-
-// ===== Mostrar primero la pantalla Landing =====
-  if (showLanding) {
-    return <Landing onStart={() => setShowLanding(false)} />;
-  }
-// =============================================
 
     return (
         <>

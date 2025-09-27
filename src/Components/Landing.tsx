@@ -1,10 +1,17 @@
 import React from "react";
 import "../Styles/Landing.css";
 import bgHero from "/src/assets/back1.jpg"; // importa la imagen
+import { useNavigate } from "react-router";
 
-type LandingProps = { onStart: () => void };
 
-const Landing: React.FC<LandingProps> = ({ onStart }) => {
+const Landing = () => {
+
+  const navigate = useNavigate()
+
+  const handleNavigate = () => {
+    navigate("/processAlgorithms")
+  } 
+
   return (
     <div
       className="hero"
@@ -34,7 +41,7 @@ const Landing: React.FC<LandingProps> = ({ onStart }) => {
           Programa que imita la ejecución de procesos en la CPU, permitiendo
           observar y entender cómo cargan y ejecutan las instrucciones.
         </p>
-        <button className="hero__cta" onClick={onStart}>EMPEZAR</button>
+        <button className="hero__cta" onClick={handleNavigate}>EMPEZAR</button>
       </main>
     </div>
   );
