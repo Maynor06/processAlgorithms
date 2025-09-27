@@ -29,7 +29,8 @@ const Landing = () => {
       <header className="hero__nav">
         <span className="hero__brand">SISTEMAS OPERATIVOS</span>
         <nav className="hero__links">
-          <a className="hero__link" href="./README.md">Acerca de</a>
+          {/* <a className="hero__link" href="./README.md">Acerca de</a> */}
+          <a className="hero__link" href="https://raw.githubusercontent.com/Maynor06/processAlgorithms/refs/heads/master/README.md">Acerca de</a>
           <a className="hero__link" href="https://github.com/Maynor06/processAlgorithms">GitHub</a>
         </nav>
       </header>
