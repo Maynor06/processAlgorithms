@@ -141,13 +141,14 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose, algoritmo }) => {
             />
 
             <input
-                type="number"
-                className="shadow-2xl"
-                value={formData.InstanteLlegada === 0 ? '' : formData.InstanteLlegada}
-                name="InstanteLlegada"
-                onChange={handleChange}
-                placeholder="Instante de llegada"
+            type="number"
+            className="shadow-2xl"
+            value={formData.InstanteLlegada}
+            name="InstanteLlegada"
+            onChange={handleChange}
+            placeholder="Instante de llegada"
             />
+
 
             {/* <input
                 type="number"

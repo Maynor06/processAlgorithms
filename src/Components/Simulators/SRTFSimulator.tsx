@@ -1,40 +1,58 @@
 // src/Components/Simulators/SRTFSimulator.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createSRTFEngine } from "../Algorithms/SRTF";
-import { TIME_UNIT } from "../Algorithms/common";
-import { getInitialProcesses } from "../../data/processes";
-import type { Process, ExecutionStep, ProcessResult } from "../Algorithms/common";
+import {
+  TIME_UNIT,
+  type Process,
+  type ExecutionStep,
+  type ProcessResult,
+} from "../Algorithms/common";
+import { useProcesoContext } from "../../Context/ProcessContext";
 
-/** Color estable por PID (HSL) */
 function colorForPid(pid: number) {
   const hue = (pid * 67) % 360;
   return `hsl(${hue} 70% 55%)`;
 }
 
-/** Componente simulador SRTF: renderiza Visualización (Gantt) + Resultados */
-export default function SRTFSimulator() {
-  // Procesos iniciales desde módulo de datos
-  const [data] = useState<Process[]>(getInitialProcesses);
+interface Props {
+  isRunning: boolean;
+  isPaused: boolean;
+  resetFlag: boolean;
+}
 
-  // Mapa PID -> Nombre
-  const [procNameMap, setProcNameMap] = useState<Map<number, string>>(
-    () => new Map(getInitialProcesses().map((p) => [p.pid, p.name]))
-  );
+export default function SRTFSimulator({
+  isRunning,
+  isPaused,
+  resetFlag,
+}: Props) {
+  const { procesos } = useProcesoContext();
 
-  // --- Estados de simulación ---
+  // Adaptar procesos del contexto al formato del motor
+  const data: Process[] = procesos.map((p) => ({
+    pid: p.PID,
+    name: p.NombreProceso,
+    burstTime: p.Duration,
+    arrivalTime: p.InstanteLlegada,
+  }));
+
   const [steps, setSteps] = useState<ExecutionStep[]>([]);
   const [results, setResults] = useState<ProcessResult[]>([]);
-  const [isRunning, setIsRunning] = useState(true);
-  const [isPaused, setIsPaused] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
 
   const engineRef = useRef<ReturnType<typeof createSRTFEngine> | null>(null);
   const timerRef = useRef<number | null>(null);
 
-  // Crear engine e inscribir callbacks
+  // Reiniciar motor siempre que cambien procesos (cantidad) o se pida reset
   useEffect(() => {
-    const eng = createSRTFEngine({ startTime: 0 });
+    if (data.length === 0) {
+      engineRef.current = null;
+      setSteps([]);
+      setResults([]);
+      setIsComplete(false);
+      return;
+    }
 
+    const eng = createSRTFEngine({ startTime: 0 });
     data.forEach(eng.addProcess);
 
     eng.onStep((s) => setSteps((xs) => [...xs, s]));
@@ -43,10 +61,13 @@ export default function SRTFSimulator() {
 
     engineRef.current = eng;
 
-    setProcNameMap(new Map(data.map((p) => [p.pid, p.name])));
-  }, [data]);
+    // reset solo aquí
+    setSteps([]);
+    setResults([]);
+    setIsComplete(false);
+  }, [resetFlag, data.length]);
 
-  // Intervalo que avanza tick a tick
+  // Intervalo controlado desde Home
   useEffect(() => {
     if (!engineRef.current) return;
 
@@ -74,7 +95,7 @@ export default function SRTFSimulator() {
     };
   }, [isRunning, isPaused, isComplete]);
 
-  // --- Derivados para la visualización ---
+  // === Preparar datos para la visualización ===
   const MAX_COLS = 100;
 
   const runningByTime = useMemo(() => {
@@ -103,13 +124,11 @@ export default function SRTFSimulator() {
     });
     results.forEach((r) => seen.add(r.pid));
 
-    const rows: Array<[number, string]> = Array.from(seen).map((pid) => [
+    return Array.from(seen).map((pid) => [
       pid,
-      procNameMap.get(pid) ?? `P${pid}`,
+      data.find((p) => p.pid === pid)?.name ?? `P${pid}`,
     ]);
-    rows.sort((a, b) => a[1].localeCompare(b[1]));
-    return rows;
-  }, [steps, results, procNameMap]);
+  }, [steps, results, data]);
 
   const avgService =
     isComplete && results.length
@@ -119,15 +138,21 @@ export default function SRTFSimulator() {
   const currentTick = steps.length ? steps[steps.length - 1].time + 1 : 0;
 
   return (
-    <>
+    <div className="flex flex-col h-full gap-4">
       {/* === Visualización (Gantt) === */}
-      <div className="flex-1 bg-white shadow rounded-xl p-4">
+      <div className="flex-1 bg-white shadow rounded-xl p-4 overflow-y-auto">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-bold">Visualización SRTF</h2>
           <div className="text-xs text-gray-500">
             TIME_UNIT: {TIME_UNIT} ms · Estado:{" "}
-            {isComplete ? "Finalizado" : isPaused ? "Pausado" : "Corriendo"} · t=
-            {currentTick}
+            {isComplete
+              ? "Finalizado"
+              : isPaused
+              ? "Pausado"
+              : isRunning
+              ? "Corriendo"
+              : "Detenido"}{" "}
+            · t={currentTick}
           </div>
         </div>
 
@@ -151,14 +176,15 @@ export default function SRTFSimulator() {
             </thead>
             <tbody>
               {procRows.map(([pid, name]) => {
-                const color = colorForPid(pid);
+                const color = colorForPid(Number(pid));
                 return (
                   <tr key={pid} className="odd:bg-white even:bg-gray-50">
                     <td className="p-2 border font-medium">{name}</td>
                     {Array.from({ length: MAX_COLS }).map((_, t) => {
                       const runningPid = runningByTime.get(t);
                       const isRunningHere = runningPid === pid;
-                      const qpos = queuePosByTime.get(t)?.get(pid) ?? null;
+                      const qpos =
+                        queuePosByTime.get(t)?.get(Number(pid)) ?? null;
 
                       return (
                         <td
@@ -191,7 +217,7 @@ export default function SRTFSimulator() {
       </div>
 
       {/* === Resultados === */}
-      <div className="bg-white shadow rounded-xl p-4">
+      <div className="flex-1 bg-white shadow rounded-xl p-4 overflow-y-auto">
         <h2 className="text-lg font-bold mb-2">Resultados</h2>
         <table className="w-full text-sm border">
           <thead className="bg-gray-200">
@@ -233,6 +259,6 @@ export default function SRTFSimulator() {
           </tfoot>
         </table>
       </div>
-    </>
+    </div>
   );
 }
