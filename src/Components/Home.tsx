@@ -10,7 +10,7 @@ import RoundRobinSimulator from "./Simulators/RoundRobinSimulator";
 type AlgorithmKey = "srtf" | "fcfs" | "sjf" | "rr" | "priority";
 
 export default function Home() {
-  const [selectedAlgo, setSelectedAlgo] = useState<AlgorithmKey>("srtf");
+  const [selectedAlgo, setSelectedAlgo] = useState<AlgorithmKey>("fcfs");
 
   const [formData, setFormData] = useState({
     NombreProceso: "",
@@ -34,7 +34,7 @@ export default function Home() {
   const handleStart = () => {
     setIsRunning(true);
     setIsPaused(false);
-    setResetFlag(false);
+    setResetFlag(true);
   };
 
   const handlePause = () => {
@@ -48,7 +48,7 @@ export default function Home() {
   const handleReset = () => {
     setIsRunning(false);
     setIsPaused(false);
-    setResetFlag(true)
+    setResetFlag(false)
   };
 
   const renderSimulator = () => {
