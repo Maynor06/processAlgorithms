@@ -1,117 +1,158 @@
-import { useNavigate } from "react-router";
-import logo from "../assets/react.svg";
-import { useState } from "react";
-import { useProcesoContext } from "../Context/ProcessContext";
+// src/Components/Home.tsx
+import React, { useState } from "react";
+// Importamos el simulador de SRTF (está en la carpeta Simulators)
+import SRTFSimulator from "./Simulators/SRTFSimulator";
+
 import FormProceso from "./FormProcess";
-import QuequeProcess from "./QuequePrecess";
 
-const Home = () => {
+import QueueProcess from "./QuequePrecess";
 
-    const navigate = useNavigate()
-    const [showModal, setShowModal] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("")
-    const [algorithm, setAlgorithm]  = useState("")
-    const algorithmOptions = [
-    { value: "FCFS", nombre: "First Come First Served" },
-    { value: "FJS", nombre: "Shorted Job First" },
-    { value: "SRTF", nombre: "Shortest Remaining Time First" },
-    { value: "RR", nombre: "Round Robin" }
-];
+// Definimos los algoritmos disponibles como un tipo 
+type AlgorithmKey = "srtf" | "fcfs" | "sjf" | "rr" | "priority";
 
-    const { procesos } = useProcesoContext();
-    const handleSelect = (event:React.ChangeEvent<HTMLSelectElement>) => {
-        setAlgorithm(event.target.value)
-        console.log(event.target.value)
+export default function Home() {
+  // Estado que guarda qué algoritmo está seleccionado.
+  // Por ahora lo dejamos fijo en "srtf".
+  const [selectedAlgo] = useState<AlgorithmKey>("rr");
+
+  const [formData, setFormData] = useState({
+    NombreProceso: "",
+    Duration: 0,
+    InstanteLlegada: 0,
+    Quantum: 0,
+  });
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+          const { name, value } = event.target;
+          const valorParsed = name === "NombreProceso" ? value : parseInt(value);
+          setFormData({ ...formData, [name]: valorParsed });
+      };
+
+
+  const [showModal, setShowModal] = useState(false);
+
+  // Función que decide qué simulador renderizar según el algoritmo seleccionado.
+  // Esto nos permite en un futuro agregar FCFS, SJF, Round Robin, etc.
+  const renderSimulator = () => {
+    switch (selectedAlgo) {
+      case "srtf":
+        return <SRTFSimulator />;
+
+
+      // case "fcfs": return <FCFSSimulator />;
+      // case "sjf":  return <SJFSimulator />;
+      // case "rr":   return <RoundRobinSimulator />;
+      // case "priority": return <PrioritySimulator />;
+
+
+      default:
+        return (
+          <div className="bg-white shadow rounded-xl p-6 text-center text-gray-500">
+            Selecciona un algoritmo para iniciar la simulación.
+          </div>
+        );
     }
+  };
 
-    const irASimulator = () => {
-        if (procesos.length === 0) {
-            setErrorMessage('No tienes procesos creados :´(');
-            setShowModal(true);
-            return;
-        } else if (algorithm === ""){
-            setErrorMessage('Tienes que seleccionar un algoritmo');
-            setShowModal(true);
-            return;
-        }
-        switch (algorithm) {
-            case 'FCFS':
-                //ir a x componente
-                break;
-            case 'FJS': 
-                // ir a x componente
-                break;
-            case 'SRTF': 
-                // ir a x componente
-                break;
-            case 'RR':
-                // ir a x componente
-                break;
-            default:
-                // error
-                break;
-        }
-        // aca va a ir la logica para ir al componente de x proceso
-    }
+  return (
+    <div className="h-screen w-full flex flex-col bg-gray-100">
+      {/* Encabezado principal */}
+      <header className="bg-[#1d293d] text-white py-4 px-6 shadow">
+        <h1 className="text-xl font-bold">Simulador de procesos</h1>
+      </header>
 
 
-    return (
-        <>
-            <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]">
-                <div className="absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_800px_at_100%_200px,#d5c5ff,transparent)]">
-                    <img className="absolute top-5 left-0 right-225 mx-auto mt-4 w-24 h-24" src={logo} alt="Logo" />
-                    <h1 className="relative top-8 text-6xl font-bold text-center" style={{ fontFamily: "'Coiny', sans-serif" }}>Simulador</h1>
-                    <h1 className="relative top-8 text-5xl font-bold text-center" style={{ fontFamily: "'Coiny', sans-serif" }}>Gestor de Procesos en Memoria</h1>
-                    <div className="flex gap-10 justify-center items-start mt-10" >
-                        <div className="flex flex-col items-center">
-                            <FormProceso />
-                            <div className="h-8" />
-                        </div>
-                        <QuequeProcess />
-                    </div>
-                    <div className="mr-auto ml-auto w-[40%] mt-4 flex gap-2 " >
-                        <select name="algorithm" value={algorithm} onChange={handleSelect}>
-                            <option value="" disabled={true}>Selecciona el algoritmo</option>
-                            {algorithmOptions.map((option, index) => (
-                                <option key={index} value={option.value}>{option.nombre}</option>
-                            ))} 
-                        </select>
-                        <button onClick={irASimulator} className="bg-[#d7c8ff] transition-all duration-[2000ms] hover:scale-110 hover:bg-blue-200 h-12 w-56 rounded-2xl text-xl " style={{ fontFamily: "'Coiny', system-ui" }}>
-                            Iniciar Simulación
-                        </button>
-                    </div>
+      {/* Contenido principal con grid 4 columnas */}
 
-                </div>
-            </div>
-            {showModal && (
-                <div className="modal-overlay">
-                    <div className="modal">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth={2}
-                                stroke="red"
-                                width="50"
-                                height="50"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 
-                           9 0 0118 0z"
-                                />
-                            </svg>
-                            {/* <h2 style={{ color: 'red', margin: 0 }}>Error</h2>*/}
-                        </div>
-                        <p style={{ marginTop: '10px' }}>{errorMessage}</p>
-                        <button onClick={() => setShowModal(false)}>Cerrar</button>
-                    </div>
-                </div>
-            )}
-        </>
-    );
+
+      <main className="flex-1 p-4 grid grid-cols-4 gap-4 min-h-0">
+
+        <div className="col-span-1 flex flex-col bg-white shadow rounded-xl p-4">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-lg font-bold">Lista de Procesos</h2>
+
+            {/* Botón para abrir modal */}
+            <button
+              className="bg-[#314158] text-white px-3 py-1 rounded-lg text-sm"
+              onClick={() => setShowModal(true)}
+            > + Nuevo </button>
+          </div>
+
+          {/* Placeholder: aquí luego pondremos QueueProcess */}
+          <div className="border rounded-lg flex flex-col items-center p-2 overflow-y-auto max-h-[450px]">
+            <QueueProcess algoritmo={selectedAlgo} />
+          </div>
+
+
+          {/* Selector de algoritmo */}
+          <label className="text-sm font-medium mb-1">Algoritmo:</label>
+          <select
+            className="mb-4 p-2 border rounded-lg w-full text-sm"
+            defaultValue=""
+          >
+            <option value="" disabled>
+              Selecciona un algoritmo
+            </option>
+            <option value="fcfs">FCFS (First Come, First Served)</option>
+            <option value="sjf">SJF (Shortest Job First)</option>
+            <option value="srtf">SRTF (Shortest Remaining Time First)</option>
+            <option value="roundrobin">Round Robin</option>
+            <option value="priority">Por Prioridad</option>
+          </select>
+
+
+          {selectedAlgo === "rr" && (
+            <input
+              type="number"
+              className="mb-4 p-2 border rounded-lg w-full text-sm"
+              value={formData.Quantum === 0 ? '' : formData.Quantum}
+              name="Quantum"
+              onChange={handleChange}
+              placeholder="Quantum de tiempo"
+            // disabled={algoritmo !== "rr"} //caso round robin
+            // hidden={algoritmo !== "rr"}
+            />
+          )}
+
+
+          {/* Placeholder: aquí luego pondremos Controls */}
+          <div className="mt-4">
+            <button className="w-full bg-[#314158] text-white py-2 rounded-lg font-bold">
+              Simular Procesos
+            </button>
+          </div>
+        </div>
+
+
+        {/* Columna derecha: renderiza el simulador seleccionado */}
+        <div className="col-span-3 min-h-0 h-full flex flex-col gap-4 overflow-y-auto pr-1">{renderSimulator()}</div>
+      </main>
+
+      {/* Pie de página */}
+      <footer className="bg-gray-800 text-white py-1 text-center">
+        Pie de página
+      </footer>
+
+
+      {/* Modal embebido */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-[400px] relative">
+            {/* Botón de cerrar */}
+            <button
+              className="absolute top-3 right-3 px-2 py-0 bg-red-500 text-white rounded"
+              onClick={() => setShowModal(false)}
+            >
+              ×
+            </button>
+
+            {/* Aquí metemos el formulario */}
+            <FormProceso onClose={() => setShowModal(false)} algoritmo={selectedAlgo} />
+          </div>
+        </div>
+      )}
+
+
+    </div>
+  );
 }
-
-export default Home;

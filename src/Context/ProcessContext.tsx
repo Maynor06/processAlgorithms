@@ -3,9 +3,11 @@ import { createContext, useContext, useState, type ReactNode } from "react";
 export interface Proceso {
     PID: number; 
     NombreProceso: string; 
-    MemoriaRequired: number; 
+    // MemoriaRequired: number; 
     Duration: number;
-    UnidadEntrada: number;
+    InstanteLlegada: number;
+    // UnidadEntrada: number;
+    // Quantum: number;
 }
 
 interface PrecesoContextType {

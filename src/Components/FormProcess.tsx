@@ -2,17 +2,23 @@ import React, { useEffect, useState } from 'react';
 import '../styles/FormProceso.css'
 import { useProcesoContext } from '../Context/ProcessContext';
 
-const FormProceso = () => {
+interface FormProcesoProps {
+    onClose: () => void;
+    algoritmo: string; // Se recibe el algoritmo actual
+
+}
+
+const FormProceso: React.FC<FormProcesoProps> = ({ onClose, algoritmo }) => {
 
     const { agregarProceso } = useProcesoContext();
     const [formData, setFormData] = useState({
         NombreProceso: '',
-        MemoriaRequired: 0,
         Duration: 0,
-        UnidadEntrada: 0,
+        InstanteLlegada: 0,
+        Quantum: 0,
     });
 
-    const [showModal, setShowModal] = useState(false);
+    const [showModal, setShowModal] = useState(1);
     const [errorMessage, setErrorMessage] = useState('');
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,40 +43,47 @@ const FormProceso = () => {
         // genera un nombre aleatorio, si el campo esta vacio
         const nombreFinal = formData.NombreProceso.trim() || generarNombreProceso();
 
-        if (formData.MemoriaRequired <= 0) {
-            setErrorMessage('La memoria requerida debe ser mayor a 0.');
-            setShowModal(true);
-            return;
-        }
+        // if (formData.MemoriaRequired <= 0) {
+        //     setErrorMessage('La memoria requerida debe ser mayor a 0.');
+        //     return;
+        // }
 
-        if (formData.MemoriaRequired >= 1024) {
-            setErrorMessage('La memoria requerida debe ser menor a 1024MB (1GB).');
-            setShowModal(true);
-            return;
-        }
+        // if (formData.MemoriaRequired >= 1024) {
+        //     setErrorMessage('La memoria requerida debe ser menor a 1024MB (1GB).');
+        //     return;
+        // }
 
         if (formData.Duration <= 0) {
             setErrorMessage('La duración debe ser mayor a 0 segundos.');
-            setShowModal(true);
             return;
         }
 
         if (formData.Duration > 60) {
             setErrorMessage('La duración debe ser menor a 60 segundos.');
-            setShowModal(true);
             return;
         }
-        if(formData.UnidadEntrada < 0){
-            setErrorMessage('la unidad debe ser igual o mayor a 0')
-            setShowModal(true)
+
+        // if (formData.UnidadEntrada < 0) {
+        //     setErrorMessage('la unidad debe ser igual o mayor a 0')
+        //     return;
+        // }
+
+        if (formData.InstanteLlegada < 0) {
+            setErrorMessage('El instante de llegada no puede ser negativo.');
             return;
         }
+
+        // if (algoritmo === "rr" && formData.Quantum <= 0) {
+        //     setErrorMessage('El Quantum debe ser mayor a 0 en Round Robin.');
+        //     return;
+        // }
 
         const newProceso = {
             PID: Date.now(),
             ...formData,
             // si estaba vacío, se genera automáticamente
-            NombreProceso: nombreFinal 
+            NombreProceso: nombreFinal,
+            Quantum: algoritmo === "rr" ? formData.Quantum : null, // solo si aplica
         };
 
         agregarProceso(newProceso);
@@ -83,87 +96,87 @@ const FormProceso = () => {
         //Limpia los campos
         setFormData({
             NombreProceso: '',
-            MemoriaRequired: 0,
+            // MemoriaRequired: 0,
             Duration: 0,
-            UnidadEntrada: 0
+            InstanteLlegada: 0,
+            // UnidadEntrada: 0,
+            Quantum: 0
         });
+
+        setErrorMessage('');
+        onClose();
     };
 
 
     return (
-        <div className="contain-form">
-            <h1 className='font-bold text-2xl'style= {{fontFamily: "'Coiny', system-ui"}}>Crea un nuevo Proceso</h1>
-            <div className='formContain'>
+        <form className="form" onSubmit={handleSubmit}>
+            <h2 className="font-bold text-xl text-center">Nuevo Proceso</h2>
 
-                <form className="form" onSubmit={handleSubmit}>
-                    <input
-                        type="text"
-                        className='shadow-2xl'
-                        value={formData.NombreProceso}
-                        name="NombreProceso"
-                        onChange={handleChange}
-                        placeholder="Ingresa el nombre del proceso"
-                    />
+            <input
+                type="text"
+                className="shadow-2xl"
+                value={formData.NombreProceso}
+                name="NombreProceso"
+                onChange={handleChange}
+                placeholder="Nombre del proceso"
+            />
 
-                    <input
-                        type="number"
-                        className='shadow-'
-                        value={formData.MemoriaRequired === 0 ? '' : formData.MemoriaRequired}
-                        name='MemoriaRequired'
-                        onChange={handleChange}
-                        placeholder="Memoria requerida (MB)"
-                    />
+            {/* eliminar input */}
+            {/* <input
+                type="number"
+                className="shadow-2xl"
+                value={formData.MemoriaRequired === 0 ? '' : formData.MemoriaRequired}
+                name="MemoriaRequired"
+                onChange={handleChange}
+                placeholder="Memoria requerida (MB)"
+            /> */}
 
-                    <input
-                        type="number"
-                        className='shadow-'
-                        value={formData.Duration === 0 ? '' : formData.Duration}
-                        name='Duration'
-                        onChange={handleChange}
-                        placeholder="Duración (s)"
-                    />
-                    <input
-                        type="number"
-                        className='shadow-'
-                        value={formData.UnidadEntrada === 0 ? '' : formData.UnidadEntrada}
-                        name='UnidadEntrada'
-                        onChange={handleChange}
-                        placeholder='Unidad Entrada'
-                    />
-                    <button type="submit" style={{ fontFamily: "'Coiny', system-ui" }}>Crear Proceso</button>
-                </form>
-            </div>
+            <input
+                type="number"
+                className="shadow-2xl"
+                value={formData.Duration === 0 ? '' : formData.Duration}
+                name="Duration"
+                onChange={handleChange}
+                placeholder="Tiempo en CPU"
+            />
 
-            {/* Modal de error */}
+            <input
+                type="number"
+                className="shadow-2xl"
+                value={formData.InstanteLlegada === 0 ? '' : formData.InstanteLlegada}
+                name="InstanteLlegada"
+                onChange={handleChange}
+                placeholder="Instante de llegada"
+            />
 
-            {showModal && (
-                <div className="modal-overlay">
-                    <div className="modal">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth={2}
-                                stroke="red"
-                                width="50"
-                                height="50"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 
-                           9 0 0118 0z"
-                                />
-                            </svg>
-                            {/* <h2 style={{ color: 'red', margin: 0 }}>Error</h2>*/}
-                        </div>
-                        <p style={{ marginTop: '10px' }}>{errorMessage}</p>
-                        <button onClick={() => setShowModal(false)}>Cerrar</button>
-                    </div>
-                </div>
-            )}
-        </div>
+            {/* <input
+                type="number"
+                className="shadow-2xl"
+                value={formData.UnidadEntrada === 0 ? '' : formData.UnidadEntrada}
+                name="UnidadEntrada"
+                onChange={handleChange}
+                placeholder="Unidad Entrada"
+            /> */}
+
+            {/* {algoritmo === "rr" && (
+                <input
+                    type="number"
+                    className="shadow-2xl"
+                    value={formData.Quantum === 0 ? '' : formData.Quantum}
+                    name="Quantum"
+                    onChange={handleChange}
+                    placeholder="Quantum de tiempo"
+                // disabled={algoritmo !== "rr"} //caso round robin
+                // hidden={algoritmo !== "rr"}
+                />
+            )} */}
+
+            {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
+
+            <button type="submit" className="bg-[#314158] text-white rounded-lg py-2">
+                Crear Proceso
+            </button>
+        </form>
     );
 };
 

@@ -36,7 +36,7 @@
 
 .form button {
     height: 40px;
-    background-color: #d7c8ff;
+    background-color: #314158;
     width: 150px;
     border-radius: 10px;
     margin-left: auto;
@@ -61,7 +61,7 @@
     padding: 20px;
     border-radius: 10px;
     width: 300px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     display: flex;
     flex-direction: column;
     align-items: center; /* Centra todo horizontalmente */
