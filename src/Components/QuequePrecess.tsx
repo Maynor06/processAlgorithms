@@ -35,9 +35,9 @@ const QuequeProcess = ({ algoritmo }: { algoritmo: string }) => {
                             {/* <p>Unidad de Entrada: {proceso.UnidadEntrada}</p> */}
 
                             {/* muestra la propiedad Quantum si el algoritmo es rr */}
-                            {algoritmo === "rr" && (
+                            {/* {algoritmo === "rr" && (
                                 <p>Quantum: {proceso.Quantum}</p>
-                            )}
+                            )} */}
 
 
                         </motion.div>

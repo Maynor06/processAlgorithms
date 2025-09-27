@@ -13,10 +13,8 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose, algoritmo }) => {
     const { agregarProceso } = useProcesoContext();
     const [formData, setFormData] = useState({
         NombreProceso: '',
-        // MemoriaRequired: 0,
         Duration: 0,
         InstanteLlegada: 0,
-        // UnidadEntrada: 0,
         Quantum: 0,
     });
 
@@ -160,7 +158,7 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose, algoritmo }) => {
                 placeholder="Unidad Entrada"
             /> */}
 
-            {algoritmo === "rr" && (
+            {/* {algoritmo === "rr" && (
                 <input
                     type="number"
                     className="shadow-2xl"
@@ -171,7 +169,8 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose, algoritmo }) => {
                 // disabled={algoritmo !== "rr"} //caso round robin
                 // hidden={algoritmo !== "rr"}
                 />
-            )}
+            )} */}
+
             {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
 
             <button type="submit" className="bg-[#314158] text-white rounded-lg py-2">
