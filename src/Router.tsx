@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router"
 import { ProcesoProvider } from "./Context/ProcessContext"
+import Landing from "./Components/Landing"
 import Home from "./Components/Home"
 
 const RouterComponent = () => {
@@ -7,7 +8,8 @@ const RouterComponent = () => {
         <ProcesoProvider>
             <BrowserRouter>
             <Routes>
-                <Route path="/" element={<Home/>} />
+                <Route path="/" element={<Landing/>} />
+                <Route path="/processAlgorithms" element={<Home/>} />
             </Routes>
             </BrowserRouter>
         </ProcesoProvider>
