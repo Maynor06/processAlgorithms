@@ -13,7 +13,21 @@ type AlgorithmKey = "srtf" | "fcfs" | "sjf" | "rr" | "priority";
 export default function Home() {
   // Estado que guarda qué algoritmo está seleccionado.
   // Por ahora lo dejamos fijo en "srtf".
-  const [selectedAlgo] = useState<AlgorithmKey>("srtf");
+  const [selectedAlgo] = useState<AlgorithmKey>("rr");
+
+  const [formData, setFormData] = useState({
+    NombreProceso: "",
+    Duration: 0,
+    InstanteLlegada: 0,
+    Quantum: 0,
+  });
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+          const { name, value } = event.target;
+          const valorParsed = name === "NombreProceso" ? value : parseInt(value);
+          setFormData({ ...formData, [name]: valorParsed });
+      };
+
 
   const [showModal, setShowModal] = useState(false);
 
@@ -66,7 +80,7 @@ export default function Home() {
 
           {/* Placeholder: aquí luego pondremos QueueProcess */}
           <div className="border rounded-lg flex flex-col items-center p-2 overflow-y-auto max-h-[450px]">
-            <QueueProcess algoritmo={selectedAlgo}/>
+            <QueueProcess algoritmo={selectedAlgo} />
           </div>
 
 
@@ -85,6 +99,20 @@ export default function Home() {
             <option value="roundrobin">Round Robin</option>
             <option value="priority">Por Prioridad</option>
           </select>
+
+
+          {selectedAlgo === "rr" && (
+            <input
+              type="number"
+              className="mb-4 p-2 border rounded-lg w-full text-sm"
+              value={formData.Quantum === 0 ? '' : formData.Quantum}
+              name="Quantum"
+              onChange={handleChange}
+              placeholder="Quantum de tiempo"
+            // disabled={algoritmo !== "rr"} //caso round robin
+            // hidden={algoritmo !== "rr"}
+            />
+          )}
 
 
           {/* Placeholder: aquí luego pondremos Controls */}

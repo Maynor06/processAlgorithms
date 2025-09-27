@@ -7,7 +7,7 @@ export interface Proceso {
     Duration: number;
     InstanteLlegada: number;
     // UnidadEntrada: number;
-    Quantum: number;
+    // Quantum: number;
 }
 
 interface PrecesoContextType {
