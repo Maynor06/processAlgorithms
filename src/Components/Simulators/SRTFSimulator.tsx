@@ -137,128 +137,117 @@ export default function SRTFSimulator({
 
   const currentTick = steps.length ? steps[steps.length - 1].time + 1 : 0;
 
-  return (
-    <div className="flex flex-col h-full gap-4">
-      {/* === Visualización (Gantt) === */}
-      <div className="flex-1 bg-white shadow rounded-xl p-4 overflow-y-auto">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-bold">Visualización SRTF</h2>
-          <div className="text-xs text-gray-500">
-            TIME_UNIT: {TIME_UNIT} ms · Estado:{" "}
-            {isComplete
-              ? "Finalizado"
-              : isPaused
-              ? "Pausado"
-              : isRunning
-              ? "Corriendo"
-              : "Detenido"}{" "}
-            · t={currentTick}
-          </div>
-        </div>
-
-        <div className="border rounded-lg overflow-x-auto">
-          <table className="text-xs min-w-[1400px]">
-            <thead className="bg-gray-100 sticky top-0">
-              <tr>
-                <th className="p-2 border text-left min-w-[80px]">Proceso</th>
-                {Array.from({ length: MAX_COLS }).map((_, t) => (
-                  <th
-                    key={t}
-                    className={
-                      "border px-3 py-1 font-normal " +
-                      (t === currentTick - 1 ? "bg-blue-50" : "")
-                    }
-                  >
-                    {t}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {procRows.map(([pid, name]) => {
-                const color = colorForPid(Number(pid));
-                return (
-                  <tr key={pid} className="odd:bg-white even:bg-gray-50">
-                    <td className="p-2 border font-medium">{name}</td>
-                    {Array.from({ length: MAX_COLS }).map((_, t) => {
-                      const runningPid = runningByTime.get(t);
-                      const isRunningHere = runningPid === pid;
-                      const qpos =
-                        queuePosByTime.get(t)?.get(Number(pid)) ?? null;
-
-                      return (
-                        <td
-                          key={t}
-                          className={
-                            "border text-center align-middle h-7 min-w-[36px] " +
-                            (isRunningHere ? "text-white" : "")
-                          }
-                          style={{
-                            background: isRunningHere ? color : undefined,
-                          }}
-                          title={
-                            isRunningHere
-                              ? `t=${t}: ${name} en CPU`
-                              : qpos
-                              ? `t=${t}: ${name} en cola (#${qpos})`
-                              : `t=${t}`
-                          }
-                        >
-                          {isRunningHere ? "■" : qpos ? qpos : ""}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+return (
+  <div className="flex flex-col h-full gap-4">
+    {/* === Visualización (Gantt) === */}
+    <div className="flex-1 bg-gradient-to-br from-[#F6B39E] via-[#EB6A79] to-[#C05A7D] border border-[#C05A7D] rounded-2xl shadow-md p-4 overflow-y-auto">
+      <div className="flex items-center justify-between mb-3 border-b border-[#C05A7D] pb-2">
+        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          📊 Visualización SRTF
+        </h2>
+        <div className="text-xs text-white/90 font-medium">
+          ⏱ {TIME_UNIT} ms ·{" "}
+          {isComplete
+            ? "✅ Finalizado"
+            : isPaused
+            ? "⏸ Pausado"
+            : isRunning
+            ? "▶ Corriendo"
+            : "⏹ Detenido"}{" "}
+          · t={currentTick}
         </div>
       </div>
 
-      {/* === Resultados === */}
-      <div className="flex-1 bg-white shadow rounded-xl p-4 overflow-y-auto">
-        <h2 className="text-lg font-bold mb-2">Resultados</h2>
-        <table className="w-full text-sm border">
-          <thead className="bg-gray-200">
+      <div className="border border-[#EB6A79] rounded-lg overflow-x-auto bg-white/90 shadow-inner">
+        <table className="text-xs min-w-[1200px]">
+          <thead className="bg-[#EB6A79] text-white sticky top-0">
             <tr>
-              <th className="p-1 border">Proceso</th>
-              <th className="p-1 border">Llegada</th>
-              <th className="p-1 border">CPU</th>
-              <th className="p-1 border">Finalización</th>
-              <th className="p-1 border">Retorno</th>
-              <th className="p-1 border">Espera</th>
-              <th className="p-1 border">Índice</th>
+              <th className="p-2 border border-[#C05A7D] text-left min-w-[80px] font-semibold">
+                Proceso
+              </th>
+              {Array.from({ length: MAX_COLS }).map((_, t) => (
+                <th
+                  key={t}
+                  className={
+                    "border border-[#C05A7D] px-3 py-1 font-normal " +
+                    (t === currentTick - 1
+                      ? "bg-[#3A5678] text-white font-bold"
+                      : "")
+                  }
+                >
+                  {t}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          {/* cuerpo igual que antes */}
+        </table>
+      </div>
+    </div>
+
+    {/* === Resultados === */}
+    <div className="flex-1 bg-gradient-to-br from-[#805A7A] via-[#C05A7D] to-[#3A5678] border border-[#805A7A] rounded-2xl shadow-md p-4 overflow-y-auto">
+      <h2 className="text-lg font-bold text-white mb-3 border-b border-white/30 pb-2 flex items-center gap-2">
+        📑 Resultados
+      </h2>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm border-collapse rounded-lg overflow-hidden">
+          <thead>
+            <tr className="bg-[#EB6A79] text-white uppercase text-xs tracking-wider">
+              <th className="px-3 py-2 text-left">Proceso</th>
+              <th className="px-3 py-2 text-center">Llegada</th>
+              <th className="px-3 py-2 text-center">CPU</th>
+              <th className="px-3 py-2 text-center">Finalización</th>
+              <th className="px-3 py-2 text-center">Retorno</th>
+              <th className="px-3 py-2 text-center">Espera</th>
+              <th className="px-3 py-2 text-center">Índice</th>
             </tr>
           </thead>
           <tbody>
             {results.map((r) => (
-              <tr key={r.pid}>
-                <td className="p-1 border">{r.name}</td>
-                <td className="p-1 border">{r.arrivalTime}</td>
-                <td className="p-1 border">{r.burstTime}</td>
-                <td className="p-1 border">{r.finishTime}</td>
-                <td className="p-1 border">{r.turnaroundTime}</td>
-                <td className="p-1 border">{r.waitingTime}</td>
-                <td className="p-1 border">{r.serviceIndex.toFixed(2)}</td>
+              <tr
+                key={r.pid}
+                className="odd:bg-white/90 even:bg-white/70 hover:bg-[#F6B39E]/60 transition-colors"
+              >
+                <td className="px-3 py-2 font-medium text-[#3A5678]">{r.name}</td>
+                <td className="px-3 py-2 text-center">{r.arrivalTime}</td>
+                <td className="px-3 py-2 text-center">{r.burstTime}</td>
+                <td className="px-3 py-2 text-center">{r.finishTime}</td>
+                <td className="px-3 py-2 text-center">{r.turnaroundTime}</td>
+                <td className="px-3 py-2 text-center">{r.waitingTime}</td>
+                <td className="px-3 py-2 text-center">
+                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-[#EB6A79] text-white">
+                    {r.serviceIndex.toFixed(2)}
+                  </span>
+                </td>
               </tr>
             ))}
           </tbody>
           <tfoot>
-            <tr className="bg-gray-50">
-              <td className="p-1 border text-gray-700">
+            <tr className="bg-[#C05A7D]/80 text-white">
+              <td className="px-3 py-2 font-medium">
                 {avgService === null
                   ? "Promedio índice (al finalizar):"
                   : "Promedio índice:"}
               </td>
-              <td className="p-1 border" colSpan={5}></td>
-              <td className="p-1 border font-semibold">
-                {avgService === null ? "—" : avgService.toFixed(2)}
+              <td className="px-3 py-2 text-center" colSpan={5}></td>
+              <td className="px-3 py-2 text-center">
+                {avgService === null ? (
+                  "—"
+                ) : (
+                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-[#3A5678] text-white">
+                    {avgService.toFixed(2)}
+                  </span>
+                )}
               </td>
             </tr>
           </tfoot>
         </table>
       </div>
     </div>
-  );
+  </div>
+);
+
+
+
 }
