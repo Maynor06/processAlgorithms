@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import SRTFSimulator from "./Simulators/SRTFSimulator";
 
 import FormProceso from "./FormProcess";
-
 import QueueProcess from "./QuequePrecess";
 
 // Definimos los algoritmos disponibles como un tipo 
@@ -12,8 +11,7 @@ type AlgorithmKey = "srtf" | "fcfs" | "sjf" | "rr" | "priority";
 
 export default function Home() {
   // Estado que guarda qué algoritmo está seleccionado.
-  // Por ahora lo dejamos fijo en "srtf".
-  const [selectedAlgo] = useState<AlgorithmKey>("rr");
+  const [selectedAlgo, setSelectedAlgo] = useState<AlgorithmKey>("srtf");
 
   const [formData, setFormData] = useState({
     NombreProceso: "",
@@ -23,28 +21,22 @@ export default function Home() {
   });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-          const { name, value } = event.target;
-          const valorParsed = name === "NombreProceso" ? value : parseInt(value);
-          setFormData({ ...formData, [name]: valorParsed });
-      };
-
+    const { name, value } = event.target;
+    const valorParsed = name === "NombreProceso" ? value : parseInt(value);
+    setFormData({ ...formData, [name]: valorParsed });
+  };
 
   const [showModal, setShowModal] = useState(false);
 
   // Función que decide qué simulador renderizar según el algoritmo seleccionado.
-  // Esto nos permite en un futuro agregar FCFS, SJF, Round Robin, etc.
   const renderSimulator = () => {
     switch (selectedAlgo) {
       case "srtf":
         return <SRTFSimulator />;
-
-
       // case "fcfs": return <FCFSSimulator />;
       // case "sjf":  return <SJFSimulator />;
       // case "rr":   return <RoundRobinSimulator />;
       // case "priority": return <PrioritySimulator />;
-
-
       default:
         return (
           <div className="bg-white shadow rounded-xl p-6 text-center text-gray-500">
@@ -61,12 +53,10 @@ export default function Home() {
         <h1 className="text-xl font-bold">Simulador de procesos</h1>
       </header>
 
-
       {/* Contenido principal con grid 4 columnas */}
-
-
       <main className="flex-1 p-4 grid grid-cols-4 gap-4 min-h-0">
 
+        {/* Columna izquierda */}
         <div className="col-span-1 flex flex-col bg-white shadow rounded-xl p-4">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-bold">Lista de Procesos</h2>
@@ -78,29 +68,26 @@ export default function Home() {
             > + Nuevo </button>
           </div>
 
-          {/* Placeholder: aquí luego pondremos QueueProcess */}
+          {/* Lista de procesos */}
           <div className="border rounded-lg flex flex-col items-center p-2 overflow-y-auto max-h-[450px]">
             <QueueProcess algoritmo={selectedAlgo} />
           </div>
-
 
           {/* Selector de algoritmo */}
           <label className="text-sm font-medium mb-1">Algoritmo:</label>
           <select
             className="mb-4 p-2 border rounded-lg w-full text-sm"
-            defaultValue=""
+            value={selectedAlgo}
+            onChange={(e) => setSelectedAlgo(e.target.value as AlgorithmKey)}
           >
-            <option value="" disabled>
-              Selecciona un algoritmo
-            </option>
             <option value="fcfs">FCFS (First Come, First Served)</option>
             <option value="sjf">SJF (Shortest Job First)</option>
             <option value="srtf">SRTF (Shortest Remaining Time First)</option>
-            <option value="roundrobin">Round Robin</option>
+            <option value="rr">Round Robin</option>
             <option value="priority">Por Prioridad</option>
           </select>
 
-
+          {/* Quantum visible solo si es Round Robin */}
           {selectedAlgo === "rr" && (
             <input
               type="number"
@@ -109,13 +96,10 @@ export default function Home() {
               name="Quantum"
               onChange={handleChange}
               placeholder="Quantum de tiempo"
-            // disabled={algoritmo !== "rr"} //caso round robin
-            // hidden={algoritmo !== "rr"}
             />
           )}
 
-
-          {/* Placeholder: aquí luego pondremos Controls */}
+          {/* Placeholder: botón de simulación */}
           <div className="mt-4">
             <button className="w-full bg-[#314158] text-white py-2 rounded-lg font-bold">
               Simular Procesos
@@ -123,16 +107,16 @@ export default function Home() {
           </div>
         </div>
 
-
         {/* Columna derecha: renderiza el simulador seleccionado */}
-        <div className="col-span-3 min-h-0 h-full flex flex-col gap-4 overflow-y-auto pr-1">{renderSimulator()}</div>
+        <div className="col-span-3 min-h-0 h-full flex flex-col gap-4 overflow-y-auto pr-1">
+          {renderSimulator()}
+        </div>
       </main>
 
       {/* Pie de página */}
       <footer className="bg-gray-800 text-white py-1 text-center">
         Pie de página
       </footer>
-
 
       {/* Modal embebido */}
       {showModal && (
@@ -151,8 +135,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-
     </div>
   );
 }
