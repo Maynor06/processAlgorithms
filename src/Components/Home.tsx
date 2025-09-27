@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 // Importamos el simulador de SRTF (está en la carpeta Simulators)
 import SRTFSimulator from "./Simulators/SRTFSimulator";
+import FCFSSimulator from "./Components/Simulators/FCFSSimulator";
 
 import FormProceso from "./FormProcess";
 
