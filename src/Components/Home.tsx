@@ -3,9 +3,6 @@ import React, { useState } from "react";
 import SRTFSimulator from "./Simulators/SRTFSimulator";
 import FCFSSimulator from "./Simulators/FCFSSimulator";
 import SJFSimulator from "./Simulators/SJFSimulator";
-
-
-
 import FormProceso from "./FormProcess";
 import QueueProcess from "./QuequePrecess";
 import RoundRobinSimulator from "./Simulators/RoundRobinSimulator";
@@ -37,7 +34,7 @@ export default function Home() {
   const handleStart = () => {
     setIsRunning(true);
     setIsPaused(false);
-    setResetFlag(true);
+    setResetFlag(false);
   };
 
   const handlePause = () => {
@@ -51,6 +48,7 @@ export default function Home() {
   const handleReset = () => {
     setIsRunning(false);
     setIsPaused(false);
+    setResetFlag(true)
   };
 
   const renderSimulator = () => {
