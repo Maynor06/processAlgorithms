@@ -164,14 +164,14 @@ export default function SRTFSimulator({
         <table className="text-xs min-w-[1200px]">
           <thead className="bg-slate-100 text-slate-700 sticky top-0">
             <tr>
-              <th className="p-2 border border-slate-200 text-left min-w-[80px] font-medium">
-                Proceso
+              <th className="p-2 border border-slate-600 bg-slate-400 text-left min-w-[80px] font-medium">
+                PROCESO
               </th>
               {Array.from({ length: MAX_COLS }).map((_, t) => (
                 <th
                   key={t}
                   className={
-                    "border border-slate-200 px-3 py-1 font-normal " +
+                    "border border-slate-600 bg-slate-400 px-3 py-1 font-normal " +
                     (t === currentTick - 1
                       ? "bg-slate-200 text-slate-900 font-bold"
                       : "")
@@ -239,13 +239,13 @@ export default function SRTFSimulator({
         <table className="w-full text-sm border-collapse rounded-lg overflow-hidden">
           <thead>
             <tr className="bg-slate-100 text-slate-700 uppercase text-xs tracking-wider">
-              <th className="px-3 py-2 border border-slate-200 text-left">Proceso</th>
-              <th className="px-3 py-2 border border-slate-200 text-center">Llegada</th>
-              <th className="px-3 py-2 border border-slate-200 text-center">CPU</th>
-              <th className="px-3 py-2 border border-slate-200 text-center">Finalización</th>
-              <th className="px-3 py-2 border border-slate-200 text-center">Retorno</th>
-              <th className="px-3 py-2 border border-slate-200 text-center">Espera</th>
-              <th className="px-3 py-2 border border-slate-200 text-center">Índice</th>
+              <th className="px-3 py-2 border border-slate-600 text-left bg-slate-400">Proceso</th>
+              <th className="px-3 py-2 border border-slate-600 text-left bg-slate-400">Llegada</th>
+              <th className="px-3 py-2 border border-slate-600 text-left bg-slate-400">CPU</th>
+              <th className="px-3 py-2 border border-slate-600 text-left bg-slate-400">Finalización</th>
+              <th className="px-3 py-2 border border-slate-600 text-left bg-slate-400">Retorno</th>
+              <th className="px-3 py-2 border border-slate-600 text-left bg-slate-400">Espera</th>
+              <th className="px-3 py-2 border border-slate-600 text-left bg-slate-400">Índice</th>
             </tr>
           </thead>
           <tbody>
