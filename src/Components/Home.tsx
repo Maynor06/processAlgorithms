@@ -66,7 +66,7 @@ export default function Home() {
 
           {/* Placeholder: aquí luego pondremos QueueProcess */}
           <div className="border rounded-lg flex flex-col items-center p-2 overflow-y-auto max-h-[450px]">
-            <QueueProcess />
+            <QueueProcess algoritmo={selectedAlgo}/>
           </div>
 
 
