@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import SRTFSimulator from "./Simulators/SRTFSimulator";
 import FCFSSimulator from "./Simulators/FCFSSimulator";
+import SJFSimulator from "./Simulators/SJFSimulator";
+
 
 
 import FormProceso from "./FormProcess";
@@ -72,7 +74,14 @@ export default function Home() {
           );
 
 
-      // case "sjf": return <SJFSimulator ... />;
+        case "sjf":
+          return (
+            <SJFSimulator
+              isRunning={isRunning}
+              isPaused={isPaused}
+              resetFlag={resetFlag}
+            />
+          );
       // case "rr": return <RoundRobinSimulator ... />;
       // case "priority": return <PrioritySimulator ... />;
       default:
