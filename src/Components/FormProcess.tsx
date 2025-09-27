@@ -73,10 +73,10 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose, algoritmo }) => {
             return;
         }
 
-        if (algoritmo === "rr" && formData.Quantum <= 0) {
-            setErrorMessage('El Quantum debe ser mayor a 0 en Round Robin.');
-            return;
-        }
+        // if (algoritmo === "rr" && formData.Quantum <= 0) {
+        //     setErrorMessage('El Quantum debe ser mayor a 0 en Round Robin.');
+        //     return;
+        // }
 
         const newProceso = {
             PID: Date.now(),
