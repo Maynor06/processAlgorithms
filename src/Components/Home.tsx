@@ -34,6 +34,10 @@ export default function Home() {
   };
 
   const handleStart = () => {
+     if (!formData.NombreProceso || formData.tiempo <= 0) {
+    alert("Por favor ingrese todos los datos antes de iniciar");
+    return;
+  }
     setIsRunning(true);
     setIsPaused(false);
     setResetFlag(false);
@@ -50,7 +54,6 @@ export default function Home() {
   const handleReset = () => {
     setIsRunning(false);
     setIsPaused(false);
-    setResetFlag(true);
   };
 
   const renderSimulator = () => {
@@ -94,14 +97,14 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen w-full flex flex-col bg-gray-100">
-      <header className="bg-[#1d293d] text-white py-4 px-6 shadow">
-        <h1 className="text-xl font-bold">Simulador de procesos</h1>
+    <div className="h-screen w-full flex flex-col bg-slate-200">
+      <header className="bg-slate-900 text-white py-4 px-6 shadow">
+        <h1 className="text-3xl font-bold"style={{fontFamily: 'Zalando Sans Expanded, sans-serif'}}>Simulador de procesos</h1>
       </header>
 
-      <main className="flex-1 p-4 grid grid-cols-4 gap-4 min-h-0">
+      <main className="flex-1 p-4 grid grid-cols-4 gap-4 min-h-0 ">
         {/* Columna izquierda */}
-        <div className="col-span-1 flex flex-col bg-white shadow rounded-xl p-4">
+  <div className="col-span-1 flex flex-col bg-white shadow-lg rounded-xl p-4 h-[660px]">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-bold">Lista de Procesos</h2>
             <button
@@ -112,7 +115,7 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="border rounded-lg flex flex-col items-center p-2 overflow-y-auto max-h-[450px]">
+          <div className="border rounded-lg shadow-lg flex flex-col items-center p-2 overflow-y-auto max-h-[450px]">
             <QueueProcess algoritmo={selectedAlgo} />
           </div>
 
@@ -187,7 +190,7 @@ export default function Home() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-[400px] relative">
+          <div className="bg-white rounded-xl shadow-2xl p-6 w-[400px] relative">
             <button
               className="absolute top-3 right-3 px-2 py-0 bg-red-500 text-white rounded"
               onClick={() => setShowModal(false)}
