@@ -35,10 +35,6 @@ export default function Home() {
   };
 
   const handleStart = () => {
-     if (!formData.NombreProceso || formData.tiempo <= 0) {
-    alert("Por favor ingrese todos los datos antes de iniciar");
-    return;
-  }
     setIsRunning(true);
     setIsPaused(false);
     setResetFlag(true);
@@ -149,7 +145,7 @@ export default function Home() {
           <div className="mt-3 flex flex-row flex-wrap justify-center gap-2 text-xs">
             {!isRunning && (
               <button
-                className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded"
+                className="bg-slate-500 hover:bg-slate-600 text-white text-xl font-medium px-20 py-1 rounded"
                 onClick={handleStart}
               >
                 Iniciar
@@ -157,7 +153,7 @@ export default function Home() {
             )}
             {isRunning && !isPaused && (
               <button
-                className="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded"
+                className="bg-red-500 hover:bg-red-600 text-white px-10 font-medium text-xl py-1 rounded"
                 onClick={handlePause}
               >
                 Pausar
@@ -165,7 +161,7 @@ export default function Home() {
             )}
             {isRunning && isPaused && (
               <button
-                className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded"
+                className="bg-blue-500 hover:bg-blue-600 text-white px-10 font-medium text-xl py-1 rounded"
                 onClick={handleResume}
               >
                 Reanudar
@@ -173,7 +169,7 @@ export default function Home() {
             )}
             {(isRunning || resetFlag) && (
               <button
-                className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+                className="bg-green-500 hover:bg-green-600 text-white px-10 font-medium text-xl py-1 rounded"
                 onClick={handleReset}
               >
                 Reiniciar
