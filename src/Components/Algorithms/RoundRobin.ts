@@ -128,26 +128,25 @@ export function createRoundRobinEngine(
   }
 
     function tick(): boolean {
-        // 1️⃣ Añadir procesos que llegan en este tick
+        // Añadir procesos que llegan en esta unidad
         enqueueArrivalsAt(t);
 
-        // 2️⃣ Si el proceso actual agotó su quantum → reencolar
+        // Si el proceso actual agotó su quantum vuelve a la cola
         if (current && quantumCounter >= quantum) {
             ready.push(current);
             current = null;
             quantumCounter = 0;
         }
 
-        // 3️⃣ Tomar snapshot de la cola **completa** para este tick
         const queueBefore = orderedQueueSnapshot();
 
-        // 4️⃣ Si no hay proceso actual, tomar el siguiente de la cola
+        // Si no hay proceso actual, tomar el siguiente de la cola
         if (!current && ready.length > 0) {
             current = ready.shift()!;
             quantumCounter = 0;
         }
 
-        // 5️⃣ Ejecutar 1 unidad del proceso actual
+        // Ejecutar 1 unidad del proceso actual
         if (current) {
             remaining[current.pid]--;
             executed++;
@@ -161,7 +160,7 @@ export function createRoundRobinEngine(
                 queueBefore
             });
 
-            // ✅ Si terminó
+            // Si terminó
             if (remaining[current.pid] === 0) {
                 const finishTime = t + 1;
                 const Tr = finishTime - current.arrivalTime;
@@ -187,10 +186,10 @@ export function createRoundRobinEngine(
             }
         }
 
-        // 6️⃣ Avanzar el reloj
+        // Avanzar el reloj
         t++;
 
-        // 7️⃣ Si todos terminaron, notificar
+        // Si todos terminaron, notificar
         if (executed >= totalBurst) {
             results.sort((a, b) => a.name.localeCompare(b.name));
             onComplete?.(results.slice());
