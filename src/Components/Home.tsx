@@ -80,7 +80,7 @@ export default function Home() {
 
       <main className="flex-1 p-4 grid grid-cols-4 gap-4 min-h-0">
         {/* Columna izquierda */}
-        <div className="col-span-1 flex flex-col bg-white shadow rounded-xl p-4">
+        <div className="col-span-1 flex flex-col bg-white shadow rounded-xl p-4 h-[550px]">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-bold">Lista de Procesos</h2>
             <button
@@ -120,10 +120,10 @@ export default function Home() {
           )}
 
           {/* Controles de simulación */}
-          <div className="mt-3 flex flex-row flex-wrap justify-center gap-2 text-xs">
+          <div className="mt-2 flex flex-row flex-wrap justify-center text-sm">
             {!isRunning && (
               <button
-                className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded"
+                className="bg-slate-600 hover:bg-slate-700 text-white px-20 py-2 rounded"
                 onClick={handleStart}
               >
                 Iniciar
@@ -131,7 +131,7 @@ export default function Home() {
             )}
             {isRunning && !isPaused && (
               <button
-                className="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded"
+                className="bg-red-400 hover:bg-red-500 text-white px-2 py-1 rounded mr-2"
                 onClick={handlePause}
               >
                 Pausar
@@ -139,7 +139,7 @@ export default function Home() {
             )}
             {isRunning && isPaused && (
               <button
-                className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded"
+                className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded mr-2"
                 onClick={handleResume}
               >
                 Reanudar
@@ -147,7 +147,7 @@ export default function Home() {
             )}
             {(isRunning || resetFlag) && (
               <button
-                className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+                className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded mr-2"
                 onClick={handleReset}
               >
                 Reiniciar
