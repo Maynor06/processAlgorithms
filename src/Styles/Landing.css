@@ -1,0 +1,171 @@
+/* ========= HERO ========= */
+.hero {
+  position: relative;
+  min-height: 100dvh;
+  color: #ffffff;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+  padding-top: 25px;
+}
+
+
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.90) 0%, rgba(0,0,0,0) 100%);
+  z-index: 0; /* debajo del contenido, encima de la imagen */
+}
+
+/* ===== Barra superior ===== */
+.hero__nav {
+  width: 100%;
+  max-width: 1400px;
+  margin: 18px auto 0;
+  padding: 14px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  position: relative; /* para estar sobre el overlay */
+  z-index: 1;
+}
+
+.hero__brand {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-size: clamp(12px, 1.6vw, 15px);
+  white-space: nowrap;
+  text-shadow: none; /* sin glow */
+}
+
+.hero__links {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 3vw, 28px);
+  flex-wrap: wrap;
+}
+
+.hero__link {
+  color: #e9eeff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: clamp(12px, 1.6vw, 15px);
+  opacity: 0.95;
+  text-shadow: none; /* sin glow */
+  transition: opacity .2s ease;
+}
+.hero__link:hover { opacity: 1; }
+
+/* ===== Centro del hero ===== */
+.hero__center {
+  max-width: 100%;
+  text-align: center;
+  position: relative; /* para estar sobre el overlay */
+  z-index: 1;
+  height: 55vh;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.hero__title {
+  font-size: clamp(20px, 8vw, 60px);
+  line-height: 1.05;
+  font-weight: 800;
+  margin: 0 0 16px 0;
+  white-space: nowrap;      /* en una sola línea */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hero__subtitle {
+  font-size: clamp(14px, 2.2vw, 18px);
+  color: #dde6ff;
+  max-width: 860px;
+  margin: 0 auto clamp(22px, 3.6vw, 34px) auto;
+}
+
+/* ===== Botón largo blanco con glow ===== */
+.hero__cta {
+  width: 30%;
+  border: 0;
+  border-radius: 14px;
+  font-weight: 800;
+  padding: clamp(14px, 2vw, 18px) clamp(56px, 8vw, 96px); /* más largo */
+  background:rgb(248, 250, 250);
+  color: #0c1124;
+  cursor: pointer;
+  font-size: clamp(14px, 1.8vw, 16px);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow:
+    0 0 10px rgba(255,255,255,0.9),
+    0 0 20px rgba(255,255,255,0.7),
+    0 0 40px rgba(255,255,255,0.5);
+  transition: transform .2s ease, box-shadow .3s ease, opacity .2s ease;
+  margin-left: auto;
+  margin-right: auto;
+}
+.hero__cta:hover {
+  transform: scale(1.05);
+  box-shadow:
+    0 0 18px rgba(255,255,255,1),
+    0 0 36px rgba(255,255,255,0.9),
+    0 0 64px rgba(255,255,255,0.85);
+}
+
+/* ==================== RESPONSIVE BREAKPOINTS ==================== */
+
+/* Tablet */
+@media (max-width: 992px) {
+  .hero__nav { padding: 12px 20px; margin-top: 16px; }
+  .hero__center { margin-top: clamp(36px, 9vh, 80px); }
+}
+
+/* Móvil grande */
+@media (max-width: 768px) {
+  .hero__nav {
+    max-width: 100%;
+    padding: 12px clamp(14px, 4vw, 20px);
+    gap: 10px;
+  }
+  .hero__links { gap: clamp(8px, 2.6vw, 16px); }
+  .hero__cta { width: 100%; max-width: 340px; }
+}
+
+/* Móvil pequeño */
+@media (max-width: 480px) {
+  .hero__nav { justify-content: space-between; }
+  .hero__brand { letter-spacing: 0.06em; }
+  .hero__center { margin-top: clamp(24px, 8vh, 64px); }
+  .hero__subtitle { max-width: 96%; }
+}
+
+/* Accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .hero__cta { transition: none; }
+}
+
+/* Tablet y abajo: permitir 2 líneas si hace falta y ajustar tamaño */
+@media (max-width: 768px) {
+  .hero__title {
+    white-space: normal;               /* ← ya no forzamos una línea */
+    text-overflow: clip;
+    overflow: visible;
+    font-size: clamp(26px, 7.5vw, 48px);
+    line-height: 1.1;
+    text-wrap: balance;                /* distribuye mejor las líneas (navegadores modernos) */
+  }
+
+  .hero__center {
+    padding: 0 clamp(16px, 5vw, 28px); /* un poco más de aire lateral */
+  }
+}
+
+/* Móvil estrecho (≤ 420px): aún más pequeño para evitar cortes */
+@media (max-width: 420px) {
+  .hero__title {
+    font-size: clamp(24px, 8.5vw, 40px);
+  }
+}
