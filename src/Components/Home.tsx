@@ -1,6 +1,8 @@
 // src/Components/Home.tsx
 import React, { useState } from "react";
 import SRTFSimulator from "./Simulators/SRTFSimulator";
+import FCFSSimulator from "./Simulators/FCFSSimulator";
+
 
 import FormProceso from "./FormProcess";
 import QueueProcess from "./QuequePrecess";
@@ -59,7 +61,17 @@ export default function Home() {
             resetFlag={resetFlag}
           />
         );
-      // case "fcfs": return <FCFSSimulator ... />;
+
+        case "fcfs":
+          return (
+            <FCFSSimulator
+              isRunning={isRunning}
+              isPaused={isPaused}
+              resetFlag={resetFlag}
+            />
+          );
+
+
       // case "sjf": return <SJFSimulator ... />;
       // case "rr": return <RoundRobinSimulator ... />;
       // case "priority": return <PrioritySimulator ... />;
