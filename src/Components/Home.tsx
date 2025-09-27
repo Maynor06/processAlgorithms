@@ -4,6 +4,7 @@ import SRTFSimulator from "./Simulators/SRTFSimulator";
 
 import FormProceso from "./FormProcess";
 import QueueProcess from "./QuequePrecess";
+import RoundRobinSimulator from "./Simulators/RoundRobinSimulator";
 
 type AlgorithmKey = "srtf" | "fcfs" | "sjf" | "rr" | "priority";
 
@@ -61,7 +62,12 @@ export default function Home() {
         );
       // case "fcfs": return <FCFSSimulator ... />;
       // case "sjf": return <SJFSimulator ... />;
-      // case "rr": return <RoundRobinSimulator ... />;
+      case "rr": return <RoundRobinSimulator 
+        isRunning = {isRunning}
+        isPaused = {isPaused}
+        resetFlag = {resetFlag}
+        quantum={formData.Quantum}
+       />;
       // case "priority": return <PrioritySimulator ... />;
       default:
         return (
