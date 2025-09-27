@@ -5,7 +5,7 @@ import { useProcesoContext } from '../Context/ProcessContext';
 interface FormProcesoProps {
     onClose: () => void;
     algoritmo: string; // Se recibe el algoritmo actual
-    
+
 }
 
 const FormProceso: React.FC<FormProcesoProps> = ({ onClose, algoritmo }) => {
@@ -13,10 +13,10 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose, algoritmo }) => {
     const { agregarProceso } = useProcesoContext();
     const [formData, setFormData] = useState({
         NombreProceso: '',
-        MemoriaRequired: 0,
+        // MemoriaRequired: 0,
         Duration: 0,
         InstanteLlegada: 0,
-        UnidadEntrada: 0,
+        // UnidadEntrada: 0,
         Quantum: 0,
     });
 
@@ -45,15 +45,15 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose, algoritmo }) => {
         // genera un nombre aleatorio, si el campo esta vacio
         const nombreFinal = formData.NombreProceso.trim() || generarNombreProceso();
 
-        if (formData.MemoriaRequired <= 0) {
-            setErrorMessage('La memoria requerida debe ser mayor a 0.');
-            return;
-        }
+        // if (formData.MemoriaRequired <= 0) {
+        //     setErrorMessage('La memoria requerida debe ser mayor a 0.');
+        //     return;
+        // }
 
-        if (formData.MemoriaRequired >= 1024) {
-            setErrorMessage('La memoria requerida debe ser menor a 1024MB (1GB).');
-            return;
-        }
+        // if (formData.MemoriaRequired >= 1024) {
+        //     setErrorMessage('La memoria requerida debe ser menor a 1024MB (1GB).');
+        //     return;
+        // }
 
         if (formData.Duration <= 0) {
             setErrorMessage('La duración debe ser mayor a 0 segundos.');
@@ -64,10 +64,11 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose, algoritmo }) => {
             setErrorMessage('La duración debe ser menor a 60 segundos.');
             return;
         }
-        if (formData.UnidadEntrada < 0) {
-            setErrorMessage('la unidad debe ser igual o mayor a 0')
-            return;
-        }
+
+        // if (formData.UnidadEntrada < 0) {
+        //     setErrorMessage('la unidad debe ser igual o mayor a 0')
+        //     return;
+        // }
 
         if (formData.InstanteLlegada < 0) {
             setErrorMessage('El instante de llegada no puede ser negativo.');
@@ -78,7 +79,6 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose, algoritmo }) => {
             setErrorMessage('El Quantum debe ser mayor a 0 en Round Robin.');
             return;
         }
-        console.log("holasdfsdlfkjsldfjlskdjflksdjflksjdlf" + algoritmo)
 
         const newProceso = {
             PID: Date.now(),
@@ -98,10 +98,10 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose, algoritmo }) => {
         //Limpia los campos
         setFormData({
             NombreProceso: '',
-            MemoriaRequired: 0,
+            // MemoriaRequired: 0,
             Duration: 0,
             InstanteLlegada: 0,
-            UnidadEntrada: 0,
+            // UnidadEntrada: 0,
             Quantum: 0
         });
 
@@ -124,14 +124,14 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose, algoritmo }) => {
             />
 
             {/* eliminar input */}
-            <input
+            {/* <input
                 type="number"
                 className="shadow-2xl"
                 value={formData.MemoriaRequired === 0 ? '' : formData.MemoriaRequired}
                 name="MemoriaRequired"
                 onChange={handleChange}
                 placeholder="Memoria requerida (MB)"
-            />
+            /> */}
 
             <input
                 type="number"
@@ -151,25 +151,27 @@ const FormProceso: React.FC<FormProcesoProps> = ({ onClose, algoritmo }) => {
                 placeholder="Instante de llegada"
             />
 
-            <input
+            {/* <input
                 type="number"
                 className="shadow-2xl"
                 value={formData.UnidadEntrada === 0 ? '' : formData.UnidadEntrada}
                 name="UnidadEntrada"
                 onChange={handleChange}
                 placeholder="Unidad Entrada"
-            />
+            /> */}
 
-            <input
-                type="number"
-                className="shadow-2xl"
-                value={formData.Quantum === 0 ? '' : formData.Quantum}
-                name="Quantum"
-                onChange={handleChange}
-                placeholder="Quantum de tiempo"
-                disabled={algoritmo !== "rr"} //caso round robin
-            />
-
+            {algoritmo === "rr" && (
+                <input
+                    type="number"
+                    className="shadow-2xl"
+                    value={formData.Quantum === 0 ? '' : formData.Quantum}
+                    name="Quantum"
+                    onChange={handleChange}
+                    placeholder="Quantum de tiempo"
+                // disabled={algoritmo !== "rr"} //caso round robin
+                // hidden={algoritmo !== "rr"}
+                />
+            )}
             {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
 
             <button type="submit" className="bg-[#314158] text-white rounded-lg py-2">

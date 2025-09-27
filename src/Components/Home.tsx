@@ -40,8 +40,6 @@ export default function Home() {
     }
   };
 
-
-
   return (
     <div className="h-screen w-full flex flex-col bg-gray-100">
       {/* Encabezado principal */}
@@ -67,11 +65,9 @@ export default function Home() {
           </div>
 
           {/* Placeholder: aquí luego pondremos QueueProcess */}
-          <div className="flex-1 border rounded-lg flex flex-col items-center p-2 overflow-y-auto max-h-[600px]">
+          <div className="border rounded-lg flex flex-col items-center p-2 overflow-y-auto max-h-[450px]">
             <QueueProcess />
           </div>
-
-
 
 
           {/* Selector de algoritmo */}
@@ -100,8 +96,6 @@ export default function Home() {
         </div>
 
 
-
-
         {/* Columna derecha: renderiza el simulador seleccionado */}
         <div className="col-span-3 min-h-0 h-full flex flex-col gap-4 overflow-y-auto pr-1">{renderSimulator()}</div>
       </main>
@@ -125,7 +119,7 @@ export default function Home() {
             </button>
 
             {/* Aquí metemos el formulario */}
-            <FormProceso onClose={() => setShowModal(false)} algoritmo = {selectedAlgo}/>
+            <FormProceso onClose={() => setShowModal(false)} algoritmo={selectedAlgo} />
           </div>
         </div>
       )}
