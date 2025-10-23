@@ -1,12 +1,12 @@
 // src/Components/Algorithms/RoundRobin.ts
 
+
 import type {
   Process,
   ExecutionStep,
   ProcessResult,
   QueueSnapshot
 } from "./common";
-
 
 // ===== Motor offline (para pruebas rápidas) =====
 export function runRoundRobin(
@@ -30,10 +30,16 @@ export function runRoundRobin(
   };
 
   while (executed < totalBurst) {
+    // Llegadas del instante t
     enqueueArrivals();
 
-    const queueBefore: QueueSnapshot = ready.map(p => p.pid);
+    // Seleccionar el proceso actual primero
     const current = ready.shift() ?? null;
+
+    // Snapshot de la cola DESPUÉS de sacar al actual y excluyéndolo por si acaso
+    const queueBefore: QueueSnapshot = (
+      current ? ready.filter(p => p.pid !== current.pid) : ready
+    ).map(p => p.pid);
 
     if (current) {
       const timeSlice = Math.min(quantum, remaining[current.pid]);
@@ -46,6 +52,7 @@ export function runRoundRobin(
           queueBefore
         });
         t++;
+        // Llegadas durante la ráfaga
         enqueueArrivals();
       }
 
@@ -69,10 +76,11 @@ export function runRoundRobin(
         });
         finished.add(current.pid);
       } else {
+        // No terminó, regresa al final de la cola
         ready.push(current);
       }
     } else {
-      // No hay procesos listos → avanzar tiempo
+      // No hay listos → avanzar el tiempo
       t++;
     }
   }
@@ -117,88 +125,90 @@ export function createRoundRobinEngine(
 
   function enqueueArrivalsAt(time: number) {
     for (const p of all.values()) {
-      if (p.arrivalTime === time && remaining[p.pid] > 0 && !ready.find(r => r.pid === p.pid)) {
+      if (
+        p.arrivalTime === time &&
+        remaining[p.pid] > 0 &&
+        !ready.find(r => r.pid === p.pid)
+      ) {
         ready.push(p);
       }
     }
   }
 
-  function orderedQueueSnapshot(): QueueSnapshot {
-    return ready.map(p => p.pid);
-  }
+  function tick(): boolean {
+    // Llegadas del instante actual
+    enqueueArrivalsAt(t);
 
-    function tick(): boolean {
-        // Añadir procesos que llegan en esta unidad
-        enqueueArrivalsAt(t);
-
-        // Si el proceso actual agotó su quantum vuelve a la cola
-        if (current && quantumCounter >= quantum) {
-            ready.push(current);
-            current = null;
-            quantumCounter = 0;
-        }
-
-        const queueBefore = orderedQueueSnapshot();
-
-        // Si no hay proceso actual, tomar el siguiente de la cola
-        if (!current && ready.length > 0) {
-            current = ready.shift()!;
-            quantumCounter = 0;
-        }
-
-        // Ejecutar 1 unidad del proceso actual
-        if (current) {
-            remaining[current.pid]--;
-            executed++;
-            quantumCounter++;
-
-            onStep?.({
-                time: t,
-                processId: current.pid,
-                processName: current.name,
-                remainingTime: remaining[current.pid],
-                queueBefore
-            });
-
-            // Si terminó
-            if (remaining[current.pid] === 0) {
-                const finishTime = t + 1;
-                const Tr = finishTime - current.arrivalTime;
-                const Te = Tr - current.burstTime;
-                const Is = Tr > 0 ? current.burstTime / Tr : 0;
-
-                const res: ProcessResult = {
-                    pid: current.pid,
-                    name: current.name,
-                    arrivalTime: current.arrivalTime,
-                    burstTime: current.burstTime,
-                    finishTime,
-                    turnaroundTime: Tr,
-                    waitingTime: Te,
-                    serviceIndex: Is
-                };
-
-                results.push(res);
-                onFinish?.(res);
-                finished.add(current.pid);
-                current = null;
-                quantumCounter = 0;
-            }
-        }
-
-        // Avanzar el reloj
-        t++;
-
-        // Si todos terminaron, notificar
-        if (executed >= totalBurst) {
-            results.sort((a, b) => a.name.localeCompare(b.name));
-            onComplete?.(results.slice());
-            return true;
-        }
-
-        return false;
+    // Si el proceso actual agotó su quantum vuelve a la cola
+    if (current && quantumCounter >= quantum) {
+      ready.push(current);
+      current = null;
+      quantumCounter = 0;
     }
 
+    // Tomar siguiente si no hay actual
+    if (!current && ready.length > 0) {
+      current = ready.shift()!;
+      quantumCounter = 0;
+    }
+
+    // Snapshot de cola DESPUÉS de sacar al actual y excluyéndolo por si acaso
+    const queueBefore: QueueSnapshot = (
+      current ? ready.filter(p => p.pid !== current.pid) : ready
+    ).map(p => p.pid);
+
+    // Ejecutar 1 unidad del proceso actual
+    if (current) {
+      remaining[current.pid]--;
+      executed++;
+      quantumCounter++;
+
+      onStep?.({
+        time: t,
+        processId: current.pid,
+        processName: current.name,
+        remainingTime: remaining[current.pid],
+        queueBefore
+      });
+
+      // Si terminó
+      if (remaining[current.pid] === 0) {
+        const finishTime = t + 1;
+        const Tr = finishTime - current.arrivalTime;
+        const Te = Tr - current.burstTime;
+        const Is = Tr > 0 ? current.burstTime / Tr : 0;
+
+        const res: ProcessResult = {
+          pid: current.pid,
+          name: current.name,
+          arrivalTime: current.arrivalTime,
+          burstTime: current.burstTime,
+          finishTime,
+          turnaroundTime: Tr,
+          waitingTime: Te,
+          serviceIndex: Is
+        };
+
+        results.push(res);
+        onFinish?.(res);
+        finished.add(current.pid);
+        current = null;
+        quantumCounter = 0;
+      }
+    }
+
+    // Avanzar el reloj
+    t++;
+
+    // ¿Todos terminaron?
+    if (executed >= totalBurst) {
+      results.sort((a, b) => a.name.localeCompare(b.name));
+      onComplete?.(results.slice());
+      return true;
+    }
+
+    return false;
+  }
 
   return {
     addProcess,
