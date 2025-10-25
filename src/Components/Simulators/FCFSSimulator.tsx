@@ -65,6 +65,8 @@ function mmTextCentered(
   pdf.text(text, x + (w - tw) / 2, y);
 }
 
+
+
 export default function FCFSSimulator({ isRunning, isPaused, resetFlag }: Props) {
   const { procesos } = useProcesoContext();
 
@@ -194,7 +196,7 @@ export default function FCFSSimulator({ isRunning, isPaused, resetFlag }: Props)
       pdf.setFont("helvetica", "bold");
       pdf.setFontSize(18);
       pdf.setTextColor(0, 0, 0);
-      pdf.text("Simulador Round Robin", margin, 18);
+      pdf.text("Simulador FCFS", margin, 18);
   
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(12);
@@ -301,7 +303,7 @@ export default function FCFSSimulator({ isRunning, isPaused, resetFlag }: Props)
       pdf.setFont("helvetica", "bold");
       pdf.setFontSize(15);
       pdf.setTextColor(0, 0, 0);
-      pdf.text("Resultados", margin, 18);
+      pdf.text("Resultados FCFS", margin, 25);
   
       const headers = [
         "Proceso",
@@ -388,7 +390,7 @@ export default function FCFSSimulator({ isRunning, isPaused, resetFlag }: Props)
       }
   
       const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-      pdf.save(`RoundRobin_${ts}.pdf`);
+      pdf.save(`FCFS_${ts}.pdf`);
     }
   
 

@@ -192,7 +192,7 @@ export default function SRTFSimulator({
         pdf.setFont("helvetica", "bold");
         pdf.setFontSize(18);
         pdf.setTextColor(0, 0, 0);
-        pdf.text("Simulador Round Robin", margin, 18);
+        pdf.text("Simulador SRTF", margin, 18);
     
         pdf.setFont("helvetica", "normal");
         pdf.setFontSize(12);
@@ -299,7 +299,7 @@ export default function SRTFSimulator({
         pdf.setFont("helvetica", "bold");
         pdf.setFontSize(15);
         pdf.setTextColor(0, 0, 0);
-        pdf.text("Resultados", margin, 18);
+        pdf.text("Resultados_SRTF", margin, 18);
     
         const headers = [
           "Proceso",
@@ -386,7 +386,7 @@ export default function SRTFSimulator({
         }
     
         const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-        pdf.save(`RoundRobin_${ts}.pdf`);
+        pdf.save(`SRTF_${ts}.pdf`);
       }
 
 
