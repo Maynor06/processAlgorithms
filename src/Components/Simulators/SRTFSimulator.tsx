@@ -8,10 +8,49 @@ import {
   type ProcessResult,
 } from "../Algorithms/common";
 import { useProcesoContext } from "../../Context/ProcessContext";
+import { jsPDF } from "jspdf";
 
+/* ========= helpers de color / PDF ========= */
 function colorForPid(pid: number) {
   const hue = (pid * 67) % 360;
   return `hsl(${hue} 70% 55%)`;
+}
+function hslStringToRgb(hsl: string): [number, number, number] {
+  const m =
+    hsl.match(
+      /hsl\(\s*([\d.]+)\s*(?:,|\s)\s*([\d.]+)%\s*(?:,|\s)\s*([\d.]+)%\s*\)/i
+    ) || [];
+  let h = parseFloat(m[1] ?? "0");
+  let s = parseFloat(m[2] ?? "0") / 100;
+  let l = parseFloat(m[3] ?? "0") / 100;
+
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const hp = (((h % 360) + 360) % 360) / 60;
+  const x = c * (1 - Math.abs((hp % 2) - 1));
+  let r1 = 0,
+    g1 = 0,
+    b1 = 0;
+  if (hp >= 0 && hp < 1) [r1, g1, b1] = [c, x, 0];
+  else if (hp < 2) [r1, g1, b1] = [x, c, 0];
+  else if (hp < 3) [r1, g1, b1] = [0, c, x];
+  else if (hp < 4) [r1, g1, b1] = [0, x, c];
+  else if (hp < 5) [r1, g1, b1] = [x, 0, c];
+  else [r1, g1, b1] = [c, 0, x];
+  const m2 = l - c / 2;
+  const r = Math.round((r1 + m2) * 255);
+  const g = Math.round((g1 + m2) * 255);
+  const b = Math.round((b1 + m2) * 255);
+  return [r, g, b];
+}
+function mmTextCentered(
+  pdf: jsPDF,
+  text: string,
+  x: number,
+  y: number,
+  w: number
+) {
+  const tw = pdf.getTextWidth(text);
+  pdf.text(text, x + (w - tw) / 2, y);
 }
 
 interface Props {
@@ -19,6 +58,7 @@ interface Props {
   isPaused: boolean;
   resetFlag: boolean;
 }
+
 
 export default function SRTFSimulator({
   isRunning,
@@ -300,6 +340,27 @@ export default function SRTFSimulator({
             </tr>
           </tfoot>
         </table>
+        {/* Botón Exportar PDF – dentro del contenedor gris, alineado a la izquierda */}
+        <div className="mt-4 flex justify-start">
+          <button
+            onClick={exportPdfPure}
+            aria-label="Exportar visualización y resultados a PDF"
+            className="
+              inline-flex items-center gap-2
+              px-5 py-2.5 rounded-lg
+              bg-slate-800 text-white
+              font-semibold tracking-wide
+              shadow-md shadow-slate-300/60
+              hover:bg-slate-700
+              active:scale-[0.98]
+              focus:outline-none focus:ring-4 focus:ring-slate-300
+              transition
+            "
+            title="Exportar visualización y resultados a PDF"
+          >
+            ⬇️ Exportar PDF
+          </button>
+        </div>
       </div>
     </div>
   </div>
