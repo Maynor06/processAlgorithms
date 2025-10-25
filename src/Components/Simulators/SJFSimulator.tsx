@@ -176,6 +176,218 @@ export default function SJFSimulator({
 
   const currentTick = steps.length ? steps[steps.length - 1].time + 1 : 0;
 
+    /* ========= Exportación PDF (legal landscape) ========= */
+      function exportPdfPure() {
+        const pdf = new jsPDF({
+          unit: "mm",
+          format: "legal",
+          orientation: "landscape",
+        });
+        const pageW = pdf.internal.pageSize.getWidth(); // ~356
+        const pageH = pdf.internal.pageSize.getHeight(); // ~216
+        const margin = 12;
+    
+        // Header
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(18);
+        pdf.setTextColor(0, 0, 0);
+        pdf.text("Simulador Round Robin", margin, 18);
+    
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(12);
+        const status = isComplete
+          ? "Finalizado"
+          : isPaused
+          ? "Pausado"
+          : isRunning
+          ? "Corriendo"
+          : "Detenido";
+        pdf.text(
+          ` Estado: ${status} · t=${currentTick}`,
+          margin,
+          25
+        );
+    
+        // -------- Gantt ----------
+        const procColW = 40;
+        const cellW = 10;
+        const cellH = 8.8;
+        const headH = 11;
+        const top = 34;
+    
+        const usableW = pageW - margin * 2 - procColW;
+        const colsPerPage = Math.max(1, Math.floor(usableW / cellW));
+        const maxTime = Math.min(
+          MAX_COLS,
+          Math.max(currentTick, ...Array.from(runningByTime.keys(), (k) => k + 1))
+        );
+    
+        const drawGanttPage = (tStart: number) => {
+          const tEnd = Math.min(maxTime, tStart + colsPerPage);
+    
+          pdf.setDrawColor(120);
+          pdf.setLineWidth(0.2);
+    
+          // header
+          pdf.setFillColor(200, 208, 220);
+          pdf.rect(margin, top, procColW, headH, "FD");
+          pdf.setFont("helvetica", "bold");
+          pdf.setTextColor(0, 0, 0);
+          mmTextCentered(pdf, "PROCESO", margin, top + headH / 2 + 3, procColW);
+    
+          for (let t = tStart; t < tEnd; t++) {
+            const x = margin + procColW + (t - tStart) * cellW;
+            pdf.setFillColor(200, 208, 220);
+            pdf.rect(x, top, cellW, headH, "FD");
+            pdf.setFont("helvetica", "normal");
+            mmTextCentered(pdf, String(t), x, top + headH / 2 + 3, cellW);
+          }
+    
+          // filas
+          let y = top + headH;
+          for (const [pid, name] of procRows) {
+            pdf.setFillColor(245, 247, 250);
+            pdf.rect(margin, y, procColW, cellH, "FD");
+            pdf.setTextColor(60);
+            pdf.text(String(name), margin + 2, y + cellH - 2);
+    
+            for (let t = tStart; t < tEnd; t++) {
+              const x = margin + procColW + (t - tStart) * cellW;
+              pdf.setDrawColor(220);
+              pdf.setFillColor(255, 255, 255);
+              pdf.rect(x, y, cellW, cellH, "S");
+    
+              const runningPid = runningByTime.get(t);
+              const isRunningHere = runningPid === pid;
+              const qpos = queuePosByTime.get(t)?.get(Number(pid)) ?? null;
+    
+              if (isRunningHere) {
+                const [r, g, b] = hslStringToRgb(colorForPid(Number(pid)));
+                pdf.setFillColor(r, g, b);
+                const cx = x + cellW / 2;
+                const cy = y + cellH / 2;
+                const radius = Math.min(cellW, cellH) * 0.33;
+                pdf.circle(cx, cy, radius, "F");
+              } else if (qpos !== null) {
+                pdf.setTextColor(80);
+                mmTextCentered(pdf, String(qpos), x, y + cellH - 2.6, cellW);
+              }
+            }
+            y += cellH;
+          }
+    
+          pdf.setDrawColor(120);
+          pdf.rect(
+            margin,
+            top,
+            procColW + (tEnd - tStart) * cellW,
+            headH + procRows.length * cellH,
+            "S"
+          );
+        };
+    
+        let first = true;
+        for (let tStart = 0; tStart < maxTime; tStart += colsPerPage) {
+          if (!first) pdf.addPage();
+          first = false;
+          drawGanttPage(tStart);
+        }
+    
+        // -------- Tabla de resultados (fondo transparente, bordes negros, texto negro) ----------
+        pdf.addPage();
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(15);
+        pdf.setTextColor(0, 0, 0);
+        pdf.text("Resultados", margin, 18);
+    
+        const headers = [
+          "Proceso",
+          "Llegada",
+          "CPU",
+          "Finalización",
+          "Retorno",
+          "Espera",
+          "Índice",
+        ];
+        const colWidths = [48, 24, 20, 38, 24, 24, 24];
+        const tableX = margin;
+        const rowH = 9.5;
+        const headH2 = 11;
+        const pageHInner = pageH - margin;
+        let y = 24;
+    
+        // dibujar cabecera sin relleno (transparente), texto negro, bordes negros
+        pdf.setFont("helvetica", "bold");
+        pdf.setTextColor(0, 0, 0);
+        pdf.setDrawColor(0, 0, 0);
+        let x = tableX;
+        headers.forEach((h, i) => {
+          pdf.rect(x, y, colWidths[i], headH2, "S"); // solo borde
+          mmTextCentered(pdf, h, x, y + 7, colWidths[i]);
+          x += colWidths[i];
+        });
+        y += headH2;
+    
+        // filas
+        pdf.setFont("helvetica", "normal");
+        pdf.setTextColor(0, 0, 0);
+        results.forEach((r) => {
+          if (y + rowH > pageHInner) {
+            pdf.addPage();
+            y = margin;
+            // reimprimir cabecera en nueva página
+            pdf.setFont("helvetica", "bold");
+            pdf.setTextColor(0, 0, 0);
+            pdf.setDrawColor(0, 0, 0);
+            x = tableX;
+            headers.forEach((h, i) => {
+              pdf.rect(x, y, colWidths[i], headH2, "S");
+              mmTextCentered(pdf, h, x, y + 7, colWidths[i]);
+              x += colWidths[i];
+            });
+            y += headH2;
+            pdf.setFont("helvetica", "normal");
+          }
+    
+          x = tableX;
+          const vals = [
+            r.name,
+            String(r.arrivalTime),
+            String(r.burstTime),
+            String(r.finishTime),
+            String(r.turnaroundTime),
+            String(r.waitingTime),
+            r.serviceIndex.toFixed(2),
+          ];
+          vals.forEach((val, i) => {
+            pdf.setDrawColor(0, 0, 0);
+            pdf.rect(x, y, colWidths[i], rowH, "S"); // solo borde
+            pdf.text(String(val), x + 2, y + rowH - 2.6);
+            x += colWidths[i];
+          });
+          y += rowH;
+        });
+    
+        if (results.length) {
+          if (y + rowH > pageHInner) {
+            pdf.addPage();
+            y = margin;
+          }
+          pdf.setFont("helvetica", "bold");
+          pdf.setTextColor(0, 0, 0);
+          const avg =
+            results.reduce((a, r) => a + r.serviceIndex, 0) / results.length;
+          pdf.text(
+            `Promedio índice de servicio: ${avg.toFixed(2)}`,
+            tableX,
+            y + rowH
+          );
+        }
+    
+        const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+        pdf.save(`RoundRobin_${ts}.pdf`);
+      }
+
   return (
     <div className="flex flex-col h-full gap-4">
       {/* === Visualización (Gantt) === */}
