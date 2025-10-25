@@ -20,6 +20,7 @@ export default function Home() {
   });
 
   const [showModal, setShowModal] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
 
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -27,62 +28,51 @@ export default function Home() {
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    const valorParsed = name === "NombreProceso" ? value : parseInt(value);
-    setFormData({ ...formData, [name]: valorParsed });
+    if (name === "NombreProceso") {
+      setFormData({ ...formData, [name]: value });
+      return;
+    }
+    const parsed = parseInt(value);
+    let finalValue = isNaN(parsed) ? 0 : parsed;
+    if (name === "Duration" || name === "InstanteLlegada") finalValue = Math.max(0, finalValue);
+    setFormData({ ...formData, [name]: finalValue });
   };
 
   const handleStart = () => {
+    if (selectedAlgo === "rr" && formData.Quantum <= 0) {
+      setShowAlert(true);
+      return;
+    }
     setIsRunning(true);
     setIsPaused(false);
     setResetFlag(true);
   };
 
-  const handlePause = () => {
-    setIsPaused(true);
-  };
-
-  const handleResume = () => {
-    setIsPaused(false);
-  };
-
+  const handlePause = () => setIsPaused(true);
+  const handleResume = () => setIsPaused(false);
   const handleReset = () => {
     setIsRunning(false);
     setIsPaused(false);
-    setResetFlag(false)
+    setResetFlag(false);
   };
 
   const renderSimulator = () => {
     switch (selectedAlgo) {
       case "srtf":
+        return <SRTFSimulator isRunning={isRunning} isPaused={isPaused} resetFlag={resetFlag} />;
+      case "fcfs":
+        return <FCFSSimulator isRunning={isRunning} isPaused={isPaused} resetFlag={resetFlag} />;
+      case "sjf":
+        return <SJFSimulator isRunning={isRunning} isPaused={isPaused} resetFlag={resetFlag} />;
+      case "rr":
         return (
-          <SRTFSimulator
+          <RoundRobinSimulator
             isRunning={isRunning}
             isPaused={isPaused}
             resetFlag={resetFlag}
+            quantum={formData.Quantum}
           />
         );
-        case "fcfs":
-          return (
-            <FCFSSimulator
-              isRunning={isRunning}
-              isPaused={isPaused}
-              resetFlag={resetFlag}
-            />
-          );
-        case "sjf":
-          return (
-            <SJFSimulator
-              isRunning={isRunning}
-              isPaused={isPaused}
-              resetFlag={resetFlag}
-            />
-          );
-        case "rr": return <RoundRobinSimulator 
-          isRunning = {isRunning}
-          isPaused = {isPaused}
-          resetFlag = {resetFlag}
-          quantum={formData.Quantum}
-        />;
       default:
         return (
           <div className="bg-white shadow rounded-xl p-6 text-center text-gray-500">
@@ -95,12 +85,13 @@ export default function Home() {
   return (
     <div className="h-screen w-full flex flex-col bg-slate-200">
       <header className="bg-slate-900 text-white py-4 px-6 shadow">
-        <h1 className="text-3xl font-bold"style={{fontFamily: 'Zalando Sans Expanded, sans-serif'}}>Simulador de procesos</h1>
+        <h1 className="text-3xl font-bold" style={{ fontFamily: "Zalando Sans Expanded, sans-serif" }}>
+          Simulador de procesos
+        </h1>
       </header>
 
-      <main className="flex-1 p-4 grid grid-cols-4 gap-4 min-h-0 ">
-        {/* Columna izquierda */}
-  <div className="col-span-1 flex flex-col bg-white shadow-lg rounded-xl p-4 h-[660px]">
+      <main className="flex-1 p-4 grid grid-cols-4 gap-4 min-h-0">
+        <div className="col-span-1 flex flex-col bg-white shadow-lg rounded-xl p-4 h-[660px]">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-bold">Lista de Procesos</h2>
             <button
@@ -136,10 +127,15 @@ export default function Home() {
               name="Quantum"
               onChange={handleChange}
               placeholder="Quantum de tiempo"
+              min={1}
+              step={1}
+              onKeyDown={(e) => {
+                if (["-", "+", "e", "E", "."].includes(e.key)) e.preventDefault();
+              }}
+              onWheel={(e) => (e.currentTarget as HTMLInputElement).blur()}
             />
           )}
 
-          {/* Controles de simulación */}
           <div className="mt-3 flex flex-row flex-wrap justify-center gap-2 text-xs">
             {!isRunning && (
               <button
@@ -176,13 +172,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Columna derecha */}
-      <div className="col-span-3 min-h-0 h-full flex flex-col gap-4 pr-1">
-        {/* El simulador se encargará de que cada bloque tenga su propio scroll */}
-        {renderSimulator()}
-      </div>
+        <div className="col-span-3 min-h-0 h-full flex flex-col gap-4 pr-1">
+          {renderSimulator()}
+        </div>
       </main>
-
 
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]">
@@ -197,6 +190,23 @@ export default function Home() {
               onClose={() => setShowModal(false)}
               algoritmo={selectedAlgo}
             />
+          </div>
+        </div>
+      )}
+
+      {showAlert && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]">
+          <div className="bg-white rounded-xl shadow-2xl p-6 w-[350px] text-center relative">
+            <h2 className="text-lg font-semibold mb-4 text-red-600">⚠ Quantum inválido</h2>
+            <p className="text-gray-700 mb-6">
+              El valor del <strong>Quantum</strong> debe ser mayor a 0 para el algoritmo Round Robin.
+            </p>
+            <button
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-1.5 rounded-lg"
+              onClick={() => setShowAlert(false)}
+            >
+              Entendido
+            </button>
           </div>
         </div>
       )}
