@@ -52,7 +52,6 @@ function mmTextCentered(
   const tw = pdf.getTextWidth(text);
   pdf.text(text, x + (w - tw) / 2, y);
 }
-
 /* ========= UI: Overlay de carga ========= */
 function LoadingOverlay({
   visible,
@@ -63,7 +62,7 @@ function LoadingOverlay({
 }) {
   if (!visible) return null;
   return (
-    <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-700/70 backdrop-blur-sm">
+    <div className="absolute bottom-0 left-0 w-full h-1/2 z-20 flex items-center justify-center bg-slate-700/70 backdrop-blur-sm">
       <div className="flex flex-col items-center gap-4">
         <div className="relative w-40 h-40 rounded-full border-8 border-slate-600/40">
           <div
@@ -89,7 +88,6 @@ function LoadingOverlay({
     </div>
   );
 }
-
 /* ========= Props ========= */
 interface Props {
   isRunning: boolean;
